@@ -158,7 +158,7 @@ checked="checked"
           : url
       };
     };
-    //Mapbox token 
+    
     mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
     var map = new mapboxgl.Map({
       container: 'map', 
@@ -180,17 +180,7 @@ checked="checked"
     inputs[i].onclick = switchLayer;
     }
     
-map.on('load', function() {
-  
-   map.getCanvas().style.cursor = 'default';
-
-  var value = document.createElement('span');
-  value.innerHTML = layer;
-  item.appendChild(key);
-  item.appendChild(value);
-  legend.appendChild(item);
-});  
-      
+    
     $(document).ready(function () {
       $.ajax({
         type: "GET",
