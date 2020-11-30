@@ -137,7 +137,25 @@
    <div id='map'></div>
    <div class='map-overlay' id='legend'></div>
   <div class="map-overlay" id="features">
-    
+  
+    <div id="menu">
+<input
+id="streets-v11"
+type="radio"
+name="rtoggle"
+value="streets"
+checked="checked"
+/>
+<label for="streets-v11">streets</label>
+<input id="light-v10" type="radio" name="rtoggle" value="light" />
+<label for="light-v10">light</label>
+<input id="dark-v10" type="radio" name="rtoggle" value="dark" />
+<label for="dark-v10">dark</label>
+<input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" />
+<label for="outdoors-v11">outdoors</label>
+<input id="satellite-v9" type="radio" name="rtoggle" value="satellite" />
+<label for="satellite-v9">satellite</label>
+</div>
   <script>
  
     var transformRequest = (url, resourceType) => {
@@ -154,7 +172,7 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';//Mapbox token 
     var map = new mapboxgl.Map({
       container: 'map', 
-      style: 'mapbox://styles/menger1/ckh6dsslg10f719mk8ii2gzqu', 
+      style: 'mapbox://styles/mapbox/streets-v11',
       center: [-96.350098,38.151837],
       zoom: 4,
       transformRequest: transformRequest
@@ -162,18 +180,6 @@
 map.on('load', function() {
   
    map.getCanvas().style.cursor = 'default';
-
-  var layers = ['0 - 100,524', '100,524 - 200,000', '200,000 - 400,000','500,000+'];
-  var colors = ['#f8b435', '#cb6715', '#e31c1c', '#181716'];
-  
-  //create legend
-  for (i = 0; i < layers.length; i++) {
-  var layer = layers[i];
-  var color = colors[i];
-  var item = document.createElement('div');
-  var key = document.createElement('span');
-  key.className = 'legend-key';
-  key.style.backgroundColor = color;
 
   var value = document.createElement('span');
   value.innerHTML = layer;
@@ -185,7 +191,7 @@ map.on('load', function() {
     $(document).ready(function () {
       $.ajax({
         type: "GET",
-        url:'https://docs.google.com/spreadsheets/d/1gkivKbkW5-4EQ2GC9QnICrkv9ZX2oXa_ACB_d4MCq9w/gviz/tq?tqx=out:csv&sheet=perimeters_100_final',
+        url:'https://docs.google.com/spreadsheets/d/1gkivKbkW5-4EQ2GC9QnICrkv9ZX2oXa_ACB_d4MCq9w/gviz/tq?tqx=out:csv&sheet=ignitions',
         dataType: "text",
         success: function (csvData) { makeGeoJSON(csvData); }
       });
