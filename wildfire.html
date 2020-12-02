@@ -167,127 +167,7 @@ checked="checked"
       zoom: 4,
       transformRequest: transformRequest
     });
-      map.addLayer({
-              'id': 'csvData',
-              'type': 'circle',
-              'source': {
-                'type': 'geojson',
-                'data': data
-              },
-              'paint': {
-                'circle-radius': 5,
-                'circle-color': '#e848d5',
-                'circle-stroke-color': 'red',
-                'circle-stroke-width': 1,
-                'circle-opacity': 0.5
-              }
-            });
-      
-    // On style change, remove map and re-initialize
-    map.remove();
-    map = new mapboxgl.Map({
-      container: 'map', 
-      style: 'mapbox://styles/mapbox/light-v10',
-      center: [-96.350098,38.151837],
-      zoom: 4,
-      transformRequest: transformRequest
-    });
-      function makeGeoJSON(csvData) {
-        csv2geojson.csv2geojson(csvData, {
-          latfield: 'latitude',
-          lonfield: 'longitude',
-          delimiter: ','
-        }, function (err, data) {
-          map.on('load', function () {
-
-            //Add the the layer to the map 
-            map.addLayer({
-              'id': 'csvData',
-              'type': 'circle',
-              'source': {
-                'type': 'geojson',
-                'data': data
-              },
-              'paint': {
-                'circle-radius': 5,
-                'circle-color': '#e848d5',
-                'circle-stroke-color': 'red',
-                'circle-stroke-width': 1,
-                'circle-opacity': 0.5
-              }
-            });
-    map.remove();
-    map = new mapboxgl.Map({
-      container: 'map', 
-      style: 'mapbox://styles/mapbox/dark-v10',
-      center: [-96.350098,38.151837],
-      zoom: 4,
-      transformRequest: transformRequest
-    });
-      function makeGeoJSON(csvData) {
-        csv2geojson.csv2geojson(csvData, {
-          latfield: 'latitude',
-          lonfield: 'longitude',
-          delimiter: ','
-        }, function (err, data) {
-          map.on('load', function () {
-
-            //Add the the layer to the map 
-            map.addLayer({
-              'id': 'csvData',
-              'type': 'circle',
-              'source': {
-                'type': 'geojson',
-                'data': data
-              },
-              'paint': {
-                'circle-radius': 5,
-                'circle-color': '#e848d5',
-                'circle-stroke-color': 'red',
-                'circle-stroke-width': 1,
-                'circle-opacity': 0.5
-              }
-            });
-    map.remove();
-    map = new mapboxgl.Map({
-      container: 'map', 
-      style: 'mapbox://styles/mapbox/outdoors-v11',
-      center: [-96.350098,38.151837],
-      zoom: 4,
-      transformRequest: transformRequest
-    });     
-      function makeGeoJSON(csvData) {
-        csv2geojson.csv2geojson(csvData, {
-          latfield: 'latitude',
-          lonfield: 'longitude',
-          delimiter: ','
-        }, function (err, data) {
-          map.on('load', function () {
-
-            //Add the the layer to the map 
-            map.addLayer({
-              'id': 'csvData',
-              'type': 'circle',
-              'source': {
-                'type': 'geojson',
-                'data': data
-              },
-              'paint': {
-                'circle-radius': 5,
-                'circle-color': '#e848d5',
-                'circle-stroke-color': 'red',
-                'circle-stroke-width': 1,
-                'circle-opacity': 0.5
-              }
-            });
-    map.remove();
-    map = new mapboxgl.Map({
-      container: 'map', 
-      style: 'mapbox://styles/mapbox/satellite-v9',
-      center: [-96.350098,38.151837],
-      zoom: 4,
-      transformRequest: transformRequest
-    });  
+     
       
     var layerList = document.getElementById('menu');
     var inputs = layerList.getElementsByTagName('input');
@@ -356,12 +236,12 @@ checked="checked"
 
             // Change the cursor to a pointer when the mouse is over the places layer.
             map.on('mouseenter', 'csvData', function () {
-              map.getCanvas().style.cursor = 'pointer';
+            map.getCanvas().style.cursor = 'pointer';
             });
 
             // Change it back to a pointer when it leaves.
             map.on('mouseleave', 'places', function () {
-              map.getCanvas().style.cursor = '';
+            map.getCanvas().style.cursor = '';
             });
 
           });
