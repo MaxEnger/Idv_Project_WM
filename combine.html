@@ -51,7 +51,7 @@
       }
     
     .mapboxgl-popup {
-max-width: 400px;
+max-width: 600px;
 font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
@@ -316,7 +316,7 @@ coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
 	new mapboxgl.Popup()
 		.setLngLat(coordinates)
 		.setHTML(p.FIRE_NAME + 
-			 ' Year: ' + p.FIRE_YEAR + ', Ignition:  ' + p.STAT_CAU_1 + ', Fire Size:  ' + p.FIRE_SIZE + '')
+			 ', Year: ' + p.FIRE_YEAR + ', Ignition:  ' + p.STAT_CAU_1 + ', Fire Size:  ' + p.FIRE_SIZE + '')
 		.addTo(map);
 	});
  
