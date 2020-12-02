@@ -137,7 +137,13 @@
   </div>
   <br>
   
-   <div id='map'></div>
+   <div id="map"> 
+     <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: absolute; top: 0;">
+      <option value="">Select Ignition Type</option>
+    </select>
+	
+
+</div>
    <div class='map-overlay' id='legend'></div>
   <div class="map-overlay" id="features">
     
@@ -162,6 +168,8 @@
       zoom: 4,
       transformRequest: transformRequest
     });
+
+window.map = map;
 map.on('load', function() {
   
    map.getCanvas().style.cursor = 'default';
@@ -204,59 +212,69 @@ map.on('load', function() {
             //Add the the layer to the map 
             map.addLayer({
               'id': 'csvData',
-              'type': 'circle',
+              'type': 'symbol',
               'source': {
                 'type': 'geojson',
                 'data': data
-              },
-              'paint': {
-                'circle-radius': 3,
-                'circle-color': '#e848d5',
-                'circle-stroke-color': 'white',
-                'circle-stroke-width': 1,
-                'circle-opacity': 0.5
-              }
-            });
+                       },
+          layout: {
+            "icon-image": "fire-station-15",
+            "icon-size": 1.25,
+            "icon-allow-overlap": true,
+          }
+        });
 
   
-
-            // When a click event occurs on a feature in the csvData layer, open a popup at the
-            // location of the feature, with description HTML from its properties.
-            map.on('click', 'csvData', function (e) {
-              var coordinates = e.features[0].geometry.coordinates.slice();
-
-              //set popup text 
-              //You can adjust the values of the popup to match the headers of your CSV. 
-              // For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV. 
-              var description = `<h3>` + `<b>` + `Wildfire Incident Date: ` + `</b>` +`<h3>` + e.features[0].properties.FIRE_YEAR + `</h3>` + `<h4>` + `<b>` + `Acres: ` + `</b>` + e.features[0].properties.GIS_ACRES + `</h4>` + `<h4>` + `<b>` + `Incident: ` + `</b>` + e.features[0].properties.INCIDENT + `</h4>`;
-
-
-              new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(description)
-                .addTo(map);
-            });
-
-            // Change the cursor to a pointer when the mouse is over the places layer.
-            map.on('mouseenter', 'csvData', function () {
-              map.getCanvas().style.cursor = 'pointer';
-            });
-
-            // Change it back to a pointer when it leaves.
-            map.on('mouseleave', 'places', function () {
-              map.getCanvas().style.cursor = '';
-            });
-
-          });
-
+const pubTypes = data.features.map(feature => feature.properties.IncidentName);
+        const uniquePubTypes = Array.from(new Set(pubTypes));
+        const filterElem = document.getElementById('pubTypeFilter');
+        uniquePubTypes.forEach(pubType => {
+          const opt = document.createElement('option');
+          opt.value = pubType;
+          opt.innerText = pubType; 
+          filterElem.appendChild(opt);
         });
-      };
-    });
-    
-  </script>
+	      
 
-</body>
+        filterElem.onchange = () => {
+          const pubType = filterElem.value;
+          const newGeoJSON = {...data };
+          if (pubType) {
+            newGeoJSON.features = data.features.filter(feature => feature.properties.IncidentName === pubType);
+          } else {
+            newGeoJSON.features = [...data.features];
+          }
+          map.getSource('places').setData(newGeoJSON);
+        };
 
-</html>
-	
+	      
+        const popup = new mapboxgl.Popup();
+        map.on("click", e => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['places'] });
+          if (features && features.length > 0) {
+            popup
+              .setLngLat(e.lngLat)
+              .setHTML(
+                "<h3>" +
+                  features[0].properties.FIRE_NAME +
+                  "</h3>" +
+                  "<h3>" +
+                  features[0].properties.FIRE_YEAR +
+                  "</h3>" +
+		  "<h3>" +
+                  features[0].properties.GIS_ACRES +
+                  "</h3>"
+              )
+              .addTo(map);
+          } else {
+            popup.remove();
+          }
+        });
+
+	      });
+
+	  
+	 	  
+	  </script>
+  </body>
 </html>
