@@ -203,7 +203,8 @@ $("document").ready(function () {
     });
 });
 
-	 map.on("load", function() {
+const j = j
+	map.on("load", function() {
         map.addLayer({
           id: "fires",
           type: "symbol",
@@ -217,7 +218,6 @@ $("document").ready(function () {
             "icon-allow-overlap": true,
           }
         });
-
 
         const pubTypes = j.features.map(feature => feature.properties.FIRE_NAME);
         const uniquePubTypes = Array.from(new Set(pubTypes));
