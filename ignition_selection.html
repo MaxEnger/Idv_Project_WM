@@ -76,9 +76,15 @@
   </div>
   <br>
     
-<div id="map"> <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: absolute; top: 0;">
+<div id="map"> 
+     <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: absolute; top: 0;">
       <option value="">Select Ignition Type</option>
-    </select></div>
+    </select>
+	
+     <select id="fireNameFilter" name="fireNameFilter" style="z-index: 999; position: right; top: 0;">
+      <option value="">Select IWildfire Incident Name</option>
+    </select>  
+</div>
     
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
@@ -298,6 +304,19 @@
           }
         });
 
+	   map.addLayer({
+          id: "places",
+          type: "symbol",
+          source: {
+            type: "geojson",
+            data: geojson
+          },
+          layout: {
+            "icon-image": "fire-station-11",
+            "icon-size": 1.25,
+            "icon-allow-overlap": true,
+          }
+        });
         const pubTypes = geojson.features.map(feature => feature.properties.STAT_CAU_1);
         const uniquePubTypes = Array.from(new Set(pubTypes));
         const filterElem = document.getElementById('pubTypeFilter');
@@ -307,6 +326,16 @@
           opt.innerText = pubType; 
           filterElem.appendChild(opt);
         });
+	      
+	        const pubTypes2 = geojson.features.map(feature => feature.properties.FIRE_NAME);
+		const uniquePubTypes2 = Array.from(new Set(pubTypes2));
+		const filterElem2 = document.getElementById('fireNameFilter');
+		uniquePubTypes.forEach(pubType2 => {
+		  const opt2 = document.createElement('option');
+		  opt.value = pubType2;
+		  opt.innerText = pubType2; 
+		  filterElem.appendChild(op2);
+		});
         
         filterElem.onchange = () => {
           const pubType = filterElem.value;
@@ -318,7 +347,17 @@
           }
           map.getSource('places').setData(newGeoJSON);
         };
-
+		  filterElem.onchange = () => {
+		  const pubType2 = filterElem.value;
+		  const newGeoJSON = {...geojson };
+		  if (pubType2) {
+		    newGeoJSON.features = geojson.features.filter(feature => feature.properties.Fire_NAME === pubType2);
+		  } else {
+		    newGeoJSON.features = [...geojson.features];
+		  }
+		  map.getSource('places').setData(newGeoJSON);
+		};
+	      
         const popup = new mapboxgl.Popup();
         map.on("click", e => {
           const features = map.queryRenderedFeatures(e.point, { layers: ['places'] });
@@ -339,7 +378,31 @@
             popup.remove();
           }
         });
-      });
-    </script>
+	      const popup2 = new mapboxgl.Popup();
+		map.on("click", e => {
+		  const features = map.queryRenderedFeatures(e.point, { layers: ['places'] });
+		  if (features && features.length > 0) {
+		    popup2
+		      .setLngLat(e.lngLat)
+		      .setHTML(
+			"<h3>" +
+			  features[0].properties.FIRE_NAME +
+			  "</h3>" +
+			  "<h4>Ignition Type</h4>" +
+			  "<p>" +
+			  features[0].properties.STAT_CAU_1 +
+			  "</p>"
+		      )
+		      .addTo(map);
+		  } else {
+		    popup.remove();
+		  }
+		});
+	      });
+
+	  
+	  
+	  
+	  </script>
   </body>
 </html>
