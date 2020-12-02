@@ -76,7 +76,7 @@
   </div>
   <br>
 	  
-     <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: top-right; top: 20;">
+     <select id="" name="" style="z-index: 999; position: top-right; top: 20;">
       <option value="">Select Wildfire Incident Name</option>
     </select>  
 	  
@@ -522,12 +522,12 @@ const geojson2 = {
 	      
 	        const pubTypes2 = geojson2.features.map(feature => feature.properties.FIRE_NAME);
 		const uniquePubTypes2 = Array.from(new Set(pubTypes2));
-		const filterElem2 = document.getElementById('pubTypeFilter');
+		const filterElem2 = document.getElementById('fireNameFilter');
 		uniquePubTypes.forEach(pubType2 => {
 		  const opt2 = document.createElement('option');
 		  opt2.value = pubType2;
 		  opt2.innerText = pubType2; 
-		  filterElem.appendChild(opt2);
+		  filterElem2.appendChild(opt2);
 		});
         
         filterElem.onchange = () => {
@@ -540,15 +540,15 @@ const geojson2 = {
           }
           map.getSource('places').setData(newGeoJSON);
         };
-		  filterElem.onchange = () => {
-		  const pubType2 = filterElem.value;
-		  const newGeoJSON = {...geojson2 };
+		  filterElem2.onchange = () => {
+		  const pubType2 = filterElem2.value;
+		  const newGeoJSON2 = {...geojson2 };
 		  if (pubType2) {
-		    newGeoJSON.features = geojson2.features.filter(feature => feature.properties.Fire_NAME === pubType2);
+		    newGeoJSON2.features = geojson2.features.filter(feature => feature.properties.Fire_NAME === pubType2);
 		  } else {
-		    newGeoJSON.features = [...geojson2.features];
+		    newGeoJSON2.features = [...geojson2.features];
 		  }
-		  map.getSource('places').setData(newGeoJSON);
+		  map.getSource('places2').setData(newGeoJSON2);
 		};
 	      
         const popup = new mapboxgl.Popup();
