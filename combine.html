@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset=utf-8 />
 <title>Toggling baselayers</title>
@@ -7,14 +8,126 @@
 <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
 <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
 <style>
-  body { margin:0; padding:0; }
-  #map { position:absolute; top:0; bottom:0; width:100%; }
-</style>
-</head>
-<body>
-<div id='map'></div>
+   <style type="text/css">
+  body{
+      background-color: #f1f8ff;
+    }
+  h2,
+      h3 {
+        margin: 10px;
+        font-size: 1.2em;
+      }
+      h3 {
+        font-size: 1em;
+      }
+      p {
+        font-size: 2em;
+        margin: 10px;
+        text-align: left;
+      }
+   #features {
+        top: 0;
+        height: 100px;
+        margin-top: 20px;
+        width: 250px;
+      }
+    #map {
+     height: 700px;
+      width:100%;
+    }
+   .map-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.8);
+        margin-right: 20px;
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+      }
+    
+    .mapboxgl-popup {
+      padding-bottom: 5px;
+    }
 
+    .mapboxgl-popup-close-button {
+      display: none;
+    }
+
+    .mapboxgl-popup-content {
+      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+      padding: 0;
+      width: 250px;
+    }
+
+    .mapboxgl-popup-content-wrapper {
+      padding: 1%;
+    }
+
+    .mapboxgl-popup-content h3 {
+      background: rgb(61, 59, 59);
+      text-align: center;
+      color: #fff;
+      margin: 0;
+      display: block;
+      padding: 15px;
+      font-weight: 700;
+      margin-top: -5px;
+    }
+
+    .mapboxgl-popup-content h4 {
+      margin: 0;
+      display: block;
+      padding: 10px 3px 10px 10px;
+      font-weight: 400;
+    }
+
+    .mapboxgl-container {
+      cursor: pointer;
+    }
+
+    .mapboxgl-popup-anchor-top>.mapboxgl-popup-content {
+      margin-top: 3px;
+    }
+
+    .mapboxgl-popup-anchor-top>.mapboxgl-popup-tip {
+      border-bottom-color: rgb(61, 59, 59);
+    }
+
+ </style>
+  <link rel="stylesheet" href="style.css">
+
+  
+  </head>
+<body>
+<h1>Max Enger, Studio Week 4</h1> 
+  <h2>Historic Mega-Wildfire Incidents in the United States (including Alaska) from 2010-2018</h2>
+ 
+  <div class="container">
+    <div class="center">
+      <ul>
+  	     <li><a href="index.html" target="_self">Perimeters</a></li>
+         <li><a class="active" href="wildfire.html" target="_self">Ignitions</a></li>
+         <li><a href="combine.html" target="_self">Output 3</a></li>
+         
+
+         </ul>
+    </div>
+  </div>
+  <br>
+  
+   <div id='map'></div>
 <script>
+    var transformRequest = (url, resourceType) => {
+      var isMapboxRequest =
+        url.slice(8, 22) === "api.mapbox.com" ||
+        url.slice(10, 26) === "tiles.mapbox.com";
+      return {
+        url: isMapboxRequest
+          ? url.replace("?", "?pluginName=sheetMapper&")
+          : url
+      };
+    };
 L.mapbox.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
   var map = L.mapbox.map('map', null, {
       maxZoom: 18
@@ -28,7 +141,8 @@ L.mapbox.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4b
 
   layers.Streets.addTo(map);
   L.control.layers(layers).addTo(map);
-var layerList = document.getElementById('menu');
+
+  var layerList = document.getElementById('menu');
     var inputs = layerList.getElementsByTagName('input');
  
     function switchLayer(layer) {
