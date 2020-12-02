@@ -167,7 +167,43 @@ checked="checked"
       zoom: 4,
       transformRequest: transformRequest
     });
-   
+      
+    // On style change, remove map and re-initialize
+    map.remove();
+    map = new mapboxgl.Map({
+      container: 'map', 
+      style: 'mapbox://styles/mapbox/light-v10',
+      center: [-96.350098,38.151837],
+      zoom: 4,
+      transformRequest: transformRequest
+    });
+    map.remove();
+    map = new mapboxgl.Map({
+      container: 'map', 
+      style: 'mapbox://styles/mapbox/dark-v10',
+      center: [-96.350098,38.151837],
+      zoom: 4,
+      transformRequest: transformRequest
+    });
+      
+    map.remove();
+    map = new mapboxgl.Map({
+      container: 'map', 
+      style: 'mapbox://styles/mapbox/outdoors-v11',
+      center: [-96.350098,38.151837],
+      zoom: 4,
+      transformRequest: transformRequest
+    });     
+     
+    map.remove();
+    map = new mapboxgl.Map({
+      container: 'map', 
+      style: 'mapbox://styles/mapbox/satellite-v9',
+      center: [-96.350098,38.151837],
+      zoom: 4,
+      transformRequest: transformRequest
+    });  
+      
     var layerList = document.getElementById('menu');
     var inputs = layerList.getElementsByTagName('input');
  
