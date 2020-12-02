@@ -130,8 +130,10 @@
     };
 L.mapbox.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
   var map = L.mapbox.map('map', null, {
-      maxZoom: 18
-  }).setView([22.76, -25.84], 3);
+      center: [-96.350098,38.151837],
+      zoom: 4,
+      transformRequest: transformRequest
+  });
 
   var layers = {
       Streets: L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'),
@@ -143,7 +145,7 @@ L.mapbox.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4b
   L.control.layers(layers).addTo(map);
 
   var layerList = document.getElementById('menu');
-    var inputs = layerList.getElementsByTagName('input');
+  var inputs = layerList.getElementsByTagName('input');
  
     function switchLayer(layer) {
     var layerId = layer.target.id;
