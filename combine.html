@@ -110,17 +110,16 @@
   <div class="container">
     <div class="center">
       <ul>
-  	     <li><a href="index.html" target="_self">Perimeters</a></li>
+  	 <li><a href="index.html" target="_self">Perimeters</a></li>
          <li><a class="active" href="wildfire.html" target="_self">Ignitions</a></li>
          <li><a href="combine.html" target="_self">Output 3</a></li>
-         
-
-         </ul>
+      </ul>
     </div>
   </div>
   <br>
   
    <div id='map'></div>
+
 <script>
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
@@ -132,12 +131,13 @@ zoom: 3
 });
  
 map.on('load', function () {
-// Add a GeoJSON source with 2 points
+// Add a GeoJSON source with points
 map.addSource('points', {
-
-"type": "FeatureCollection",
-"name": "GL_100k_fires",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4269" } },
+'type': 'geojson',
+'data': {
+	"type": "FeatureCollection",
+	"name": "GL_100k_fires",
+	"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4269" } },
 "features": [
 { "type": "Feature", "properties": { "OBJECTID": 7413, "FOD_ID": 7449, "FPA_ID": "FS-1433115", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USNMCIF", "NWCG_REP_2": "Cibola National Forest", "SOURCE_REP": "0303", "SOURCE_R_1": "Cibola National Forest", "LOCAL_FIRE": "12", "LOCAL_INCI": "007", "FIRE_CODE": "CC6D", "FIRE_NAME": "I-40", "ICS_209_IN": "TX-TXS-066077", "ICS_209_NA": "East Amarillo Complex", "MTBS_ID": "TX3551510078020060312", "MTBS_FIRE_": "EAST AMARILLO COMPLEX", "COMPLEX_NA": "EAST AMARILLO COMPLEX", "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/03\/12", "DISCOVERY1": 71, "DISCOVER_1": "1100", "STAT_CAUSE": 9.0, "STAT_CAU_1": "Miscellaneous", "CONT_DATE": "2006\/03\/19", "CONT_DOY": 78, "CONT_TIME": "2000", "FIRE_SIZE": 427696.0, "FIRE_SIZE_": "G", "LATITUDE": 35.21666667, "LONGITUDE": -100.93333333, "OWNER_CODE": 14.0, "OWNER_DESC": "MISSING\/NOT SPECIFIED", "STATE": "TX", "COUNTY": "179", "FIPS_CODE": "179", "FIPS_NAME": "Gray" }, "geometry": { "type": "Point", "coordinates": [ -100.933333329999982, 35.216666670000052 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 12845, "FOD_ID": 12900, "FPA_ID": "FS-1441214", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USMTCGF", "NWCG_REP_2": "Custer Gallatin National Forest", "SOURCE_REP": "0111", "SOURCE_R_1": "Gallatin National Forest", "LOCAL_FIRE": "35", "LOCAL_INCI": "006", "FIRE_CODE": "C4YP", "FIRE_NAME": "DERBY", "ICS_209_IN": "MT-GNF-000047", "ICS_209_NA": "Derby Fire", "MTBS_ID": "MT4559210981020060822", "MTBS_FIRE_": "DERBY", "COMPLEX_NA": null, "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/08\/22", "DISCOVERY1": 234, "DISCOVER_1": "1630", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2006\/10\/19", "CONT_DOY": 292, "CONT_TIME": "1800", "FIRE_SIZE": 207115.0, "FIRE_SIZE_": "G", "LATITUDE": 45.53611111, "LONGITUDE": -109.93472222, "OWNER_CODE": 5.0, "OWNER_DESC": "USFS", "STATE": "MT", "COUNTY": "97", "FIPS_CODE": "097", "FIPS_NAME": "Sweet Grass" }, "geometry": { "type": "Point", "coordinates": [ -109.934722219999969, 45.536111110000036 ] } },
@@ -333,8 +333,8 @@ map.addLayer({
               'type': 'circle',
               'source': 'points',
 		'paint': {
-	'fill-color': '#888888',
-	'fill-opacity': 0.4
+			'circle-radius': 6,
+			'circle-color': '#B42222'
 			}
            
              });
