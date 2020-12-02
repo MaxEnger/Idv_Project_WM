@@ -323,7 +323,7 @@ map.addSource('places', {
 });
  
 places.features.forEach(function (feature) {
-var symbol = feature.properties['STAT_CAU_1'];
+var symbol = feature.properties['FIRE_NAME'];
 var layerID = symbol;
 
 // Add a layer for this symbol type if it hasn't been added already.
@@ -350,7 +350,7 @@ map.addLayer({
 'text-halo-color': '#fff',
 'text-halo-width': 2
 },
-'filter': ['==', "FIRE_NAME", symbol]
+'filter': ['==', "STAT_CAU_1", symbol]
 });
  
 layerIDs.push(layerID);
