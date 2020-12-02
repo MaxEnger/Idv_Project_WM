@@ -207,15 +207,10 @@ const j = "/Idv_Project_WM/Wildfire_Perimeters2.geojson"
 	map.on("load", function() {
         map.addLayer({
           id: "fires",
-          type: "symbol",
+          type: "FeatureCollection",
           source: {
             type: "geojson",
             data: j
-          },
-          layout: {
-            "icon-image": "fire-station-15",
-            "icon-size": 1.25,
-            "icon-allow-overlap": true,
           }
         });
 
