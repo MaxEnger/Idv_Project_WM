@@ -192,7 +192,16 @@ checked="checked"
       zoom: 4,
       transformRequest: transformRequest
     });
-      map.addLayer({
+      function makeGeoJSON(csvData) {
+        csv2geojson.csv2geojson(csvData, {
+          latfield: 'latitude',
+          lonfield: 'longitude',
+          delimiter: ','
+        }, function (err, data) {
+          map.on('load', function () {
+
+            //Add the the layer to the map 
+            map.addLayer({
               'id': 'csvData',
               'type': 'circle',
               'source': {
@@ -215,7 +224,16 @@ checked="checked"
       zoom: 4,
       transformRequest: transformRequest
     });
-      map.addLayer({
+      function makeGeoJSON(csvData) {
+        csv2geojson.csv2geojson(csvData, {
+          latfield: 'latitude',
+          lonfield: 'longitude',
+          delimiter: ','
+        }, function (err, data) {
+          map.on('load', function () {
+
+            //Add the the layer to the map 
+            map.addLayer({
               'id': 'csvData',
               'type': 'circle',
               'source': {
@@ -238,7 +256,16 @@ checked="checked"
       zoom: 4,
       transformRequest: transformRequest
     });     
-     map.addLayer({
+      function makeGeoJSON(csvData) {
+        csv2geojson.csv2geojson(csvData, {
+          latfield: 'latitude',
+          lonfield: 'longitude',
+          delimiter: ','
+        }, function (err, data) {
+          map.on('load', function () {
+
+            //Add the the layer to the map 
+            map.addLayer({
               'id': 'csvData',
               'type': 'circle',
               'source': {
