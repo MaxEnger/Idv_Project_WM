@@ -300,6 +300,7 @@ map.addLayer({
 // location of the feature, with description HTML from its properties.
 map.on('click', 'points', function (e) {
 var coordinates = e.features[0].geometry.coordinates.slice();
+var p = e.features[0].properties;
 // var year = e.features[0].properties.FIRE_YEAR;
 // var name = e.features[0].properties.FIRE_NAME;
 // var ignition = e.features[0].properties.STAT_CAU_1;
@@ -314,7 +315,7 @@ coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
 
 	new mapboxgl.Popup()
 		.setLngLat(coordinates)
-		.setHTML(e.features[0].properties.FIRE_NAME + ' (' + e.feature[0].properties.FIRE_YEAR + e.features[0].properties.STAT_CAU_1 + e.features[0].properties.FIRE_SIZE')')
+		.setHTML(p.FIRE_NAME + ' (' + p.FIRE_YEAR + ') + (' + p.STAT_CAU_1 + ') + (' + p.FIRE_SIZE + ')')
 		.addTo(map);
 	});
  
