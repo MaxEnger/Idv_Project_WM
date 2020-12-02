@@ -295,14 +295,15 @@ map.addLayer({
 			}
            
              });
-	// When a click event occurs on a feature in the places layer, open a popup at the
+
+// When a click event occurs on a feature in the places layer, open a popup at the
 // location of the feature, with description HTML from its properties.
 map.on('click', 'points', function (e) {
 var coordinates = e.features[0].geometry.coordinates.slice();
-var year = e.features[0].properties.FIRE_YEAR;
-var name = e.features[0].properties.FIRE_NAME;
-var ignition = e.features[0].properties.STAT_CAU_1;
-var size = e.features[0].properties.FIRE_SIZE;
+// var year = e.features[0].properties.FIRE_YEAR;
+// var name = e.features[0].properties.FIRE_NAME;
+// var ignition = e.features[0].properties.STAT_CAU_1;
+// var size = e.features[0].properties.FIRE_SIZE;
 	
 // Ensure that if the map is zoomed out such that multiple
 // copies of the feature are visible, the popup appears
@@ -313,10 +314,7 @@ coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
 
 	new mapboxgl.Popup()
 		.setLngLat(coordinates)
-		.setHTML(year)
-		.setHTML(name)
-		.setHTML(ignition)
-		.setHTML(size)
+		.setHTML(e.features[0].properties.FIRE_NAME + ' (' + e.feature[0].properties.FIRE_YEAR + e.features[0].properties.STAT_CAU_1 + e.features[0].properties.FIRE_SIZE')')
 		.addTo(map);
 	});
  
