@@ -222,7 +222,7 @@ map.on('load', function() {
         });
 
   
-const pubTypes = data.features.map(feature => feature.properties.IncidentName);
+	const pubTypes = data.features.map(feature => feature.properties.IncidentName);
         const uniquePubTypes = Array.from(new Set(pubTypes));
         const filterElem = document.getElementById('pubTypeFilter');
         uniquePubTypes.forEach(pubType => {
@@ -268,9 +268,11 @@ const pubTypes = data.features.map(feature => feature.properties.IncidentName);
           }
        			 });
 });
+	
+				
 	});
-				});
-		 
+      });
+    });
 	 	  
 	 </script>
   </body>
