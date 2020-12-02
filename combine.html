@@ -315,7 +315,7 @@ coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
 
 	new mapboxgl.Popup()
 		.setLngLat(coordinates)
-		.setHTML(p.FIRE_NAME + ' (' + p.FIRE_YEAR + ') + (' + p.STAT_CAU_1 + ') + (' + p.FIRE_SIZE + ')')
+		.setHTML(p.FIRE_NAME + ' Year: (' + p.FIRE_YEAR + '), Ignition:  (' + p.STAT_CAU_1 + '), Fire Size:  (' + p.FIRE_SIZE + ')')
 		.addTo(map);
 	});
  
