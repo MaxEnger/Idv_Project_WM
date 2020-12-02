@@ -76,9 +76,10 @@
   </div>
   <br>
 	  
-     <select id="fireNameFilter" name="fireNameFilter" style="z-index: 999; position: top-right; top: 20;">
+     <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: top-right; top: 20;">
       <option value="">Select Wildfire Incident Name</option>
     </select>  
+	  
 <div id="map"> 
      <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: absolute; top: 0;">
       <option value="">Select Ignition Type</option>
@@ -521,7 +522,7 @@ const geojson2 = {
 	      
 	        const pubTypes2 = geojson2.features.map(feature => feature.properties.FIRE_NAME);
 		const uniquePubTypes2 = Array.from(new Set(pubTypes2));
-		const filterElem2 = document.getElementById('fireNameFilter');
+		const filterElem2 = document.getElementById('pubTypeFilter');
 		uniquePubTypes.forEach(pubType2 => {
 		  const opt2 = document.createElement('option');
 		  opt2.value = pubType2;
