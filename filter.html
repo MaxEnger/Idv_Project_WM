@@ -323,7 +323,7 @@ map.addSource('places', {
 });
  
 places.features.forEach(function (feature) {
-var symbol = features[0].properties.'STAT_CAU_1';
+var symbol = features.properties['STAT_CAU_1'];
 var layerID = symbol;
 
 // Add a layer for this symbol type if it hasn't been added already.
