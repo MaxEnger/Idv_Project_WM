@@ -572,7 +572,7 @@ const geojson2 = {
         });
 	      const popup2 = new mapboxgl.Popup();
 		map.on("click", e => {
-		  const features = map.queryRenderedFeatures(e.point, { layers: ['places2'] });
+		  const features2 = map.queryRenderedFeatures(e.point, { layers: ['places2'] });
 		  if (features && features.length > 0) {
 		    popup2
 		      .setLngLat(e.lngLat)
