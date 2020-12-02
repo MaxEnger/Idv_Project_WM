@@ -324,7 +324,7 @@ map.addSource('places', {
  
 places.features.forEach(function (feature) {
 var symbol = feature.properties['FIRE_NAME'];
-var layerID = symbol;
+var layerID = "poi-" + symbol;
 
 // Add a layer for this symbol type if it hasn't been added already.
 if (!map.getLayer(layerID)) {
