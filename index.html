@@ -208,9 +208,8 @@ map.on('load', function() {
 
           });
 
-        });
-      };
-	 const pubTypes = csvData.features.map(feature => feature.properties.Incident_Name);
+            };
+	const pubTypes = csvData.features.map(feature => feature.properties.Incident_Name);
         const uniquePubTypes = Array.from(new Set(pubTypes));
         const filterElem = document.getElementById('pubTypeFilter');
         uniquePubTypes.forEach(pubType => {
@@ -231,7 +230,7 @@ map.on('load', function() {
           }
           map.getSource('csvData').setData(newGeoJSON);
         };
-	    const popup = new mapboxgl.Popup();
+	const popup = new mapboxgl.Popup();
         map.on("click", e => {
           const features = map.queryRenderedFeatures(e.point, { layers: ['csvData'] });
           if (features && features.length > 0) {
@@ -252,6 +251,7 @@ map.on('load', function() {
           } else {
             popup.remove();
           }
+	
     });
     
   </script>
