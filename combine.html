@@ -2,8 +2,9 @@
 <html>
 
 <head>
+	
   <meta charset='utf-8' />
-  <title>Studio 4</title>
+  <title>Final Individual Project</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
@@ -11,7 +12,7 @@
   <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
 
-	<style>
+<style>
    <style type="text/css">
   body{
       background-color: #f1f8ff;
@@ -57,46 +58,48 @@
 
  </style>
   <link rel="stylesheet" href="style.css">
-
   
-  </head>
-<body>
-	<h1>Max Enger, Studio Week 4</h1> 
-	  <h2>Historic Mega-Wildfire Incidents in the United States (including Alaska) from 2010-2018</h2>
+</head>
 
-	  <div class="container">
-	    <div class="center">
-	      <ul>
-		 <li><a href="index.html" target="_self">Perimeters</a></li>
-		 <li><a href="wildfire.html" target="_self">Ignitions</a></li>
-		 <li><a class="active" href="combine.html" target="_self">Output 3</a></li>
-		 <li><a href="filter.html" target="_self">Output 3</a></li>
-	      </ul>
-	    </div>
-	  </div>
-	  <br>
-  
-   <div id='map'></div>
+  <body style="margin: 0px; padding: 0px;">
+    
+	  
+    <div class="container">
+    <div class="center">
+      <ul>
+  	 <li><a href="index.html" target="_self">Perimeters</a></li>
+         <li><a href="wildfire.html" target="_self">Ignitions</a></li>
+         <li><a class="active" href="combine.html" target="_self">Output 3</a></li>
+         <li><a class="active" href="ignition_selection.html" target="_self">Output 4</a></li>
+      </ul>
+    </div>
+  </div>
+  <br>
+	  
+	  
+<div id="map"> 
+     <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: absolute; top: 0;">
+      <option value="">Select Ignition Type</option>
+    </select>
+	
 
-<script>
+</div>
+    
+    <script>
+      mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
+      const map = new mapboxgl.Map({
+        container: "map",
+        style: 'mapbox://styles/mapbox/light-v10',
+        center: [-96, 37.8],
+        zoom: 3
+      });
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
-var map = new mapboxgl.Map({
-container: 'map',
-style: 'mapbox://styles/mapbox/light-v10',
-center: [-96, 37.8],
-zoom: 3
-});
- 
-map.on('load', function () {
-// Add a GeoJSON source with points
-map.addSource('points', {
-'type': 'geojson',
-'data': {
-	"type": "FeatureCollection",
-	"name": "GL_100k_fires",
-	"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4269" } },
-"features": [
+      window.map = map;
+
+      const geojson = {
+        id: "places",
+        type: "FeatureCollection",
+        "features": [
 { "type": "Feature", "properties": { "OBJECTID": 7413, "FOD_ID": 7449, "FPA_ID": "FS-1433115", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USNMCIF", "NWCG_REP_2": "Cibola National Forest", "SOURCE_REP": "0303", "SOURCE_R_1": "Cibola National Forest", "LOCAL_FIRE": "12", "LOCAL_INCI": "007", "FIRE_CODE": "CC6D", "FIRE_NAME": "I-40", "ICS_209_IN": "TX-TXS-066077", "ICS_209_NA": "East Amarillo Complex", "MTBS_ID": "TX3551510078020060312", "MTBS_FIRE_": "EAST AMARILLO COMPLEX", "COMPLEX_NA": "EAST AMARILLO COMPLEX", "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/03\/12", "DISCOVERY1": 71, "DISCOVER_1": "1100", "STAT_CAUSE": 9.0, "STAT_CAU_1": "Miscellaneous", "CONT_DATE": "2006\/03\/19", "CONT_DOY": 78, "CONT_TIME": "2000", "FIRE_SIZE": 427696.0, "FIRE_SIZE_": "G", "LATITUDE": 35.21666667, "LONGITUDE": -100.93333333, "OWNER_CODE": 14.0, "OWNER_DESC": "MISSING\/NOT SPECIFIED", "STATE": "TX", "COUNTY": "179", "FIPS_CODE": "179", "FIPS_NAME": "Gray" }, "geometry": { "type": "Point", "coordinates": [ -100.933333329999982, 35.216666670000052 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 12845, "FOD_ID": 12900, "FPA_ID": "FS-1441214", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USMTCGF", "NWCG_REP_2": "Custer Gallatin National Forest", "SOURCE_REP": "0111", "SOURCE_R_1": "Gallatin National Forest", "LOCAL_FIRE": "35", "LOCAL_INCI": "006", "FIRE_CODE": "C4YP", "FIRE_NAME": "DERBY", "ICS_209_IN": "MT-GNF-000047", "ICS_209_NA": "Derby Fire", "MTBS_ID": "MT4559210981020060822", "MTBS_FIRE_": "DERBY", "COMPLEX_NA": null, "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/08\/22", "DISCOVERY1": 234, "DISCOVER_1": "1630", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2006\/10\/19", "CONT_DOY": 292, "CONT_TIME": "1800", "FIRE_SIZE": 207115.0, "FIRE_SIZE_": "G", "LATITUDE": 45.53611111, "LONGITUDE": -109.93472222, "OWNER_CODE": 5.0, "OWNER_DESC": "USFS", "STATE": "MT", "COUNTY": "97", "FIPS_CODE": "097", "FIPS_NAME": "Sweet Grass" }, "geometry": { "type": "Point", "coordinates": [ -109.934722219999969, 45.536111110000036 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 14026, "FOD_ID": 14086, "FPA_ID": "FS-1442801", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USORUMF", "NWCG_REP_2": "Umatilla National Forest", "SOURCE_REP": "0614", "SOURCE_R_1": "Umatilla National Forest", "LOCAL_FIRE": "102", "LOCAL_INCI": "416-411", "FIRE_CODE": "C6XX", "FIRE_NAME": "COLUMBIA COMPLEX", "ICS_209_IN": "OR-UMF-000411", "ICS_209_NA": "COLUMBIA COMPLEX", "MTBS_ID": "WA4616811780620060821", "MTBS_FIRE_": "COLUMBIA COMPLEX", "COMPLEX_NA": "COLUMBIA COMPLEX", "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/08\/21", "DISCOVERY1": 233, "DISCOVER_1": "2240", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2006\/10\/09", "CONT_DOY": 282, "CONT_TIME": "1200", "FIRE_SIZE": 109259.0, "FIRE_SIZE_": "G", "LATITUDE": 46.14305556, "LONGITUDE": -118.04416667, "OWNER_CODE": 14.0, "OWNER_DESC": "MISSING\/NOT SPECIFIED", "STATE": "WA", "COUNTY": "13", "FIPS_CODE": "013", "FIPS_NAME": "Columbia" }, "geometry": { "type": "Point", "coordinates": [ -118.044166670000038, 46.14305556 ] } },
@@ -159,8 +162,8 @@ map.addSource('points', {
 { "type": "Feature", "properties": { "OBJECTID": 305614, "FOD_ID": 311426, "FPA_ID": "W-124610", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4WE", "FIRE_NAME": "PREACHER CREEK", "ICS_209_IN": "AK-UYD-000046", "ICS_209_NA": "Central Complex", "MTBS_ID": "AK6593014500220040614", "MTBS_FIRE_": "CENTRAL COMPLEX", "COMPLEX_NA": "CENTRAL COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/14", "DISCOVERY1": 166, "DISCOVER_1": "1955", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/19", "CONT_DOY": 293, "CONT_TIME": "1200", "FIRE_SIZE": 243254.0, "FIRE_SIZE_": "G", "LATITUDE": 65.983, "LONGITUDE": -145.0525, "OWNER_CODE": 4.0, "OWNER_DESC": "FWS", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -145.0525, 65.983 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 305616, "FOD_ID": 311428, "FPA_ID": "W-124706", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4WG", "FIRE_NAME": "EDWARDSCR", "ICS_209_IN": "AK-UYD-000041", "ICS_209_NA": "Eagle Complex", "MTBS_ID": "AK6555414313620040614", "MTBS_FIRE_": "EDWARDS CREEK", "COMPLEX_NA": "EAGLE COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/14", "DISCOVERY1": 166, "DISCOVER_1": "2100", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/19", "CONT_DOY": 293, "CONT_TIME": "1200", "FIRE_SIZE": 243900.0, "FIRE_SIZE_": "G", "LATITUDE": 65.5169, "LONGITUDE": -143.1724, "OWNER_CODE": 1.0, "OWNER_DESC": "BLM", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -143.1724, 65.5169 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 305618, "FOD_ID": 311430, "FPA_ID": "W-124758", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4WX", "FIRE_NAME": "DEER CREEK", "ICS_209_IN": "AK-UYD-000041", "ICS_209_NA": "Eagle Complex", "MTBS_ID": "AK6489214176420040615", "MTBS_FIRE_": "EAGLE COMPLEX (DEER CREEK)", "COMPLEX_NA": "EAGLE COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/15", "DISCOVERY1": 167, "DISCOVER_1": "0815", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/12", "CONT_DOY": 286, "CONT_TIME": "0800", "FIRE_SIZE": 103092.0, "FIRE_SIZE_": "G", "LATITUDE": 64.898, "LONGITUDE": -141.984, "OWNER_CODE": 1.0, "OWNER_DESC": "BLM", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -141.984, 64.898 ] } },
-{ "type": "Feature", "properties": { "OBJECTID": 305620, "FOD_ID": 311432, "FPA_ID": "W-124759", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4XX", "FIRE_NAME": "PINGO", "ICS_209_IN": "AK-UYD-000023", "ICS_209_NA": "Pingo", "MTBS_ID": "AK6721914633320040615", "MTBS_FIRE_": "PINGO", "COMPLEX_NA": "SOLSTICE COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/15", "DISCOVERY1": 167, "DISCOVER_1": "1140", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/19", "CONT_DOY": 293, "CONT_TIME": "1150", "FIRE_SIZE": 403993.0, "FIRE_SIZE_": "G", "LATITUDE": 67.2071, "LONGITUDE": -146.3702, "OWNER_CODE": 9.0, "OWNER_DESC": "TRIBAL", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -146.3702, 67.2071 ] } },
-{ "type": "Feature", "properties": { "OBJECTID": 305622, "FOD_ID": 311434, "FPA_ID": "W-125635", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4XV", "FIRE_NAME": "WINTER TRAILL", "ICS_209_IN": "AK-UYD-000052", "ICS_209_NA": "Winter Trail", "MTBS_ID": "AK6706314516120040615", "MTBS_FIRE_": "WINTER TRAIL", "COMPLEX_NA": "SOLSTICE COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/15", "DISCOVERY1": 167, "DISCOVER_1": "1339", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/19", "CONT_DOY": 293, "CONT_TIME": "1150", "FIRE_SIZE": 344833.0, "FIRE_SIZE_": "G", "LATITUDE": 66.9597, "LONGITUDE": -145.346, "OWNER_CODE": 4.0, "OWNER_DESC": "FWS", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -145.346, 66.9597 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 305620, "FOD_ID": 311432, "FPA_ID": "W-124759", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4XX", "FIRE_NAME": "PINGO", "ICS_209_IN": "AK-UYD-000023", "ICS_209_NA": "Pingo", "MTBS_ID": "AK6721914633320040615", "MTBS_FIRE_": "PINGO", "COMPLEX_NA": "SOLSTICE COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/15", "DISCOVERY1": 167, "DISCOVER_1": "1140", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/19", "CONT_DOY": 293, "CONT_TIME": "1150", "FIRE_SIZE": 403993.0, "FIRE_SIZE_": "G", "LATITUDE": 67.2071, "LONGITUDE": -146.3702, "OWNER_CODE": 9.0, "OWNER_DESC": "TRIBAL", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -146.3702, 67.2071 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 305622, "FOD_ID": 311434, "FPA_ID": "W-125635", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A4XV", "FIRE_NAME": "WINTER TRAILL", "ICS_209_IN": "AK-UYD-000052", "ICS_209_NA": "Winter Trail", "MTBS_ID": "AK6706314516120040615", "MTBS_FIRE_": "WINTER TRAIL", "COMPLEX_NA": "SOLSTICE COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/15", "DISCOVERY1": 167, "DISCOVER_1": "1339", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/10\/19", "CONT_DOY": 293, "CONT_TIME": "1150", "FIRE_SIZE": 344833.0, "FIRE_SIZE_": "G", "LATITUDE": 66.9597, "LONGITUDE": -145.346, "OWNER_CODE": 4.0, "OWNER_DESC": "FWS", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -145.346, 66.9597 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 305627, "FOD_ID": 311439, "FPA_ID": "W-125921", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A46Q", "FIRE_NAME": "CHICKEN 1", "ICS_209_IN": "AK-TAS-413244", "ICS_209_NA": "Chicken Complex", "MTBS_ID": "AK6384514248320040615", "MTBS_FIRE_": "TAYLOR HIGHWAY COMPLEX (CHICKEN)", "COMPLEX_NA": "TAYLOR COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/15", "DISCOVERY1": 167, "DISCOVER_1": "1540", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/11\/09", "CONT_DOY": 314, "CONT_TIME": "0945", "FIRE_SIZE": 320155.0, "FIRE_SIZE_": "G", "LATITUDE": 64.0163, "LONGITUDE": -142.0023, "OWNER_CODE": 7.0, "OWNER_DESC": "STATE", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -142.0023, 64.0163 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 305638, "FOD_ID": 311452, "FPA_ID": "W-125466", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A5DF", "FIRE_NAME": "GARDINER C", "ICS_209_IN": "AK-TAS-413889", "ICS_209_NA": "TAYLOR COMPLEX", "MTBS_ID": "AK6298214136220040617", "MTBS_FIRE_": "TAYLOR HIGHWAY COMPLEX (GARDINER CREEK)", "COMPLEX_NA": "TAYLOR COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/17", "DISCOVERY1": 169, "DISCOVER_1": "1650", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/11\/09", "CONT_DOY": 314, "CONT_TIME": "0945", "FIRE_SIZE": 125643.0, "FIRE_SIZE_": "G", "LATITUDE": 63.083, "LONGITUDE": -141.3355, "OWNER_CODE": 7.0, "OWNER_DESC": "STATE", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -141.3355, 63.083 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 305643, "FOD_ID": 311457, "FPA_ID": "W-125467", "SOURCE_SYS": "FED", "SOURCE_S_1": "DOI-WFMI", "NWCG_REPOR": "BLM", "NWCG_REP_1": "USAKASO", "NWCG_REP_2": "Alaska State Office", "SOURCE_REP": "AKAFS", "SOURCE_R_1": "Alaska Fire Service", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "A5RC", "FIRE_NAME": "BILLY CK", "ICS_209_IN": "AK-TAS-413889", "ICS_209_NA": "TAYLOR COMPLEX", "MTBS_ID": "AK6377414344020040618", "MTBS_FIRE_": "TAYLOR HIGHWAY COMPLEX (BILLY CREEK)", "COMPLEX_NA": "TAYLOR COMPLEX", "FIRE_YEAR": 2004, "DISCOVERY_": "2004\/06\/18", "DISCOVERY1": 170, "DISCOVER_1": "1440", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2004\/11\/09", "CONT_DOY": 314, "CONT_TIME": "0945", "FIRE_SIZE": 463994.0, "FIRE_SIZE_": "G", "LATITUDE": 63.8163, "LONGITUDE": -143.819, "OWNER_CODE": 7.0, "OWNER_DESC": "STATE", "STATE": "AK", "COUNTY": null, "FIPS_CODE": null, "FIPS_NAME": null }, "geometry": { "type": "Point", "coordinates": [ -143.819, 63.8163 ] } },
@@ -283,57 +286,75 @@ map.addSource('points', {
 { "type": "Feature", "properties": { "OBJECTID": 1804904, "FOD_ID": 300218404, "FPA_ID": "FWS-2015USAKKURJTH3", "SOURCE_SYS": "FED", "SOURCE_S_1": "FWS-FMIS", "NWCG_REPOR": "FWS", "NWCG_REP_1": "USAKKUR", "NWCG_REP_2": "Koyukuk National Wildlife Refuge", "SOURCE_REP": "USAKKUR", "SOURCE_R_1": "KOYUKUK NWR", "LOCAL_FIRE": null, "LOCAL_INCI": null, "FIRE_CODE": "JTH3", "FIRE_NAME": "15449 SUSHGITIT HILLS", "ICS_209_IN": "2794179", "ICS_209_NA": "Sushgitit Hills", "MTBS_ID": "AK6603215302220150621", "MTBS_FIRE_": "SUSHGITIT HILLS", "COMPLEX_NA": null, "FIRE_YEAR": 2015, "DISCOVERY_": "2015\/06\/21", "DISCOVERY1": 172, "DISCOVER_1": "1115", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2015\/09\/29", "CONT_DOY": 272, "CONT_TIME": "1415", "FIRE_SIZE": 276038.1, "FIRE_SIZE_": "G", "LATITUDE": 65.80116239, "LONGITUDE": -153.47007111, "OWNER_CODE": 1.0, "OWNER_DESC": "BLM", "STATE": "AK", "COUNTY": "Yukon-Koyukuk", "FIPS_CODE": "290", "FIPS_NAME": "Yukon-Koyukuk" }, "geometry": { "type": "Point", "coordinates": [ -153.470071110000021, 65.80116239 ] } }
 ]
 
-}
-});
- 
-map.addLayer({
-              'id': 'points',
-              'type': 'circle',
-              'source': 'points',
-		'paint': {
-			'circle-radius': 6,
-			'circle-color': '#B42222'
-			}
-           
-             });
-
-// When a click event occurs on a feature in the places layer, open a popup at the
-// location of the feature, with description HTML from its properties.
-map.on('click', 'points', function (e) {
-var coordinates = e.features[0].geometry.coordinates.slice();
-var p = e.features[0].properties;
-// var year = e.features[0].properties.FIRE_YEAR;
-// var name = e.features[0].properties.FIRE_NAME;
-// var ignition = e.features[0].properties.STAT_CAU_1;
-// var size = e.features[0].properties.FIRE_SIZE;
-	
-// Ensure that if the map is zoomed out such that multiple
-// copies of the feature are visible, the popup appears
-// over the copy being pointed to.
-while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-}
-
-	new mapboxgl.Popup()
-		.setLngLat(coordinates)
-		.setHTML(p.FIRE_NAME + 
-			 ', Year: ' + p.FIRE_YEAR + ', Ignition:  ' + p.STAT_CAU_1 + ', Fire Size:  ' + p.FIRE_SIZE + '')
-		.addTo(map);
-	});
- 
-// Change the cursor to a pointer when the mouse is over the places layer.
-map.on('mouseenter', 'points', function () {
-map.getCanvas().style.cursor = 'pointer';
-});
- 
-// Change it back to a pointer when it leaves.
-map.on('mouseleave', 'places', function () {
-map.getCanvas().style.cursor = '';
-});
-});
+};
 
 
-</script>
- 
-</body>
+      map.on("load", function() {
+        map.addLayer({
+          id: "places",
+          type: "symbol",
+          source: {
+            type: "geojson",
+            data: geojson
+          },
+          layout: {
+            "icon-image": "fire-station-15",
+            "icon-size": 1.25,
+            "icon-allow-overlap": true,
+          }
+        });
+
+
+        const pubTypes = geojson.features.map(feature => feature.properties.STAT_CAU_1);
+        const uniquePubTypes = Array.from(new Set(pubTypes));
+        const filterElem = document.getElementById('pubTypeFilter');
+        uniquePubTypes.forEach(pubType => {
+          const opt = document.createElement('option');
+          opt.value = pubType;
+          opt.innerText = pubType; 
+          filterElem.appendChild(opt);
+        });
+	      
+
+        filterElem.onchange = () => {
+          const pubType = filterElem.value;
+          const newGeoJSON = {...geojson };
+          if (pubType) {
+            newGeoJSON.features = geojson.features.filter(feature => feature.properties.STAT_CAU_1 === pubType);
+          } else {
+            newGeoJSON.features = [...geojson.features];
+          }
+          map.getSource('places').setData(newGeoJSON);
+        };
+
+	      
+        const popup = new mapboxgl.Popup();
+        map.on("click", e => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['places'] });
+          if (features && features.length > 0) {
+            popup
+              .setLngLat(e.lngLat)
+              .setHTML(
+                "<h3>" +
+                  features[0].properties.FIRE_NAME +
+                  "</h3>" +
+                  "<h3>" +
+                  features[0].properties.STAT_CAU_1 +
+                  "</h3>" +
+		  "<h3>" +
+                  features[0].properties.FIRE_SIZE +
+                  "</h3>"
+              )
+              .addTo(map);
+          } else {
+            popup.remove();
+          }
+        });
+
+	      });
+
+	  
+	 	  
+	  </script>
+  </body>
 </html>
