@@ -257,6 +257,48 @@ map.on('load', function() {
 
         });
       };
+	 const pubTypes = csvData.features.map(feature => feature.properties.Incident_Name);
+        const uniquePubTypes = Array.from(new Set(pubTypes));
+        const filterElem = document.getElementById('pubTypeFilter');
+        uniquePubTypes.forEach(pubType => {
+          const opt = document.createElement('option');
+          opt.value = pubType;
+          opt.innerText = pubType; 
+          filterElem.appendChild(opt);
+        });
+	      
+
+        filterElem.onchange = () => {
+          const pubType = filterElem.value;
+          const newGeoJSON = {...csvData };
+          if (pubType) {
+            newGeoJSON.features = csvData.features.filter(feature => feature.properties.Incident_Name === pubType);
+          } else {
+            newGeoJSON.features = [...csvData.features];
+          }
+          map.getSource('csvData').setData(newGeoJSON);
+        };
+	    const popup = new mapboxgl.Popup();
+        map.on("click", e => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['csvData'] });
+          if (features && features.length > 0) {
+            popup
+              .setLngLat(e.lngLat)
+              .setHTML(
+                "<h3>" +
+                  features[0].properties.Incident_Name +
+                  "</h3>" +
+                  "<h3>" +
+                  features[0].properties.FIRE_YEAR +
+                  "</h3>" +
+		  "<h3>" +
+                  features[0].properties.GIS_ACRES +
+                  "</h3>"
+              )
+              .addTo(map);
+          } else {
+            popup.remove();
+          }
     });
     
   </script>
