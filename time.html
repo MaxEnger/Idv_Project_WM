@@ -150,14 +150,14 @@
 
 <div class="map-overlay top">
     <div class="map-overlay-inner">
-        <h2>Significant earthquakes in 2015</h2>
-        <label id="month"></label>
-        <input id="slider" type="range" min="0" max="11" step="1" value="0" />
+        <h2>Significant Wildfire Incidents (1992-2015)</h2>
+        <label id="year"></label>
+        <input id="slider" type="range" min="1992" max="2015" step="1" value="0" />
     </div>
     <div class="map-overlay-inner">
         <div id="legend" class="legend">
             <div class="bar"></div>
-            <div>Magnitude (m)</div>
+            <div>Ignition Type</div>
         </div>
     </div>
 </div>
@@ -389,12 +389,11 @@ const geojson = {
 
 };
     function filterBy(year) {
-        var filters = ['==', 'year', year];
-        map.setFilter('earthquake-circles', filters);
-        map.setFilter('earthquake-labels', filters);
+        var filters = ['==', 'FIRE_YEAR', year];
+        map.setFilter('places', filters);
 
         // Set the label to the month
-        document.getElementById('year').textContent = year[year];
+        document.getElementById('FIRE_YEAR').textContent = year[year];
     }
 
     map.on('load', function () {
@@ -410,32 +409,7 @@ const geojson = {
                 });
 
                 map.addLayer({
-                    'id': 'earthquake-circles',
-                    'type': 'circle',
-                    'source': 'fires',
-                    'paint': {
-                        'circle-color': [
-                            'interpolate',
-                            ['linear'],
-                            ['get', 'mag'],
-                            6,
-                            '#FCA107',
-                            8,
-                            '#7F3121'
-                        ],
-                        'circle-opacity': 0.75,
-                        'circle-radius': [
-                            'interpolate',
-                            ['linear'],
-                            ['get', 'mag'],
-                            6,
-                            20,
-                            8,
-                            40
-                        ]
-                    }
-                });
-
+               
                 map.addLayer({
                     'id': 'earthquake-labels',
                     'type': 'symbol',
@@ -464,7 +438,7 @@ const geojson = {
                 document
                     .getElementById('slider')
                     .addEventListener('input', function (e) {
-                        var year = parseInt(e.target.value, 10);
+                        var year = parseInt(e.target.value, 24);
                         filterBy(year);
                     });
             }
