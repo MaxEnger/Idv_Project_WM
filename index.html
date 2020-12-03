@@ -181,16 +181,16 @@ map.on('load', function() {
 });  
 	 
 
-$("document").ready(function () {
-    map.on('load', function () {
-        $.getJSON("/Idv_Project_WM/Wildfire_Perimeters2.geojson", function (j) { // j is the actual json
-            map.addSource('fires', {
-                'type': 'geojson',
-                'data': j
-            });
-        });
-    });
-});
+// $("document").ready(function () {
+//     map.on('load', function () {
+//         $.getJSON("/Idv_Project_WM/Wildfire_Perimeters2.geojson", function (j) { // j is the actual json
+//             map.addSource('fires', {
+//                 'type': 'geojson',
+//                 'data': j
+//             });
+//         });
+//     });
+// });
 
 const j = new GeoJsonLayer({
       data: 'https://github.com/MaxEnger/Idv_Project_WM/blob/main/Wildfire_Perimeters2.geojson',
