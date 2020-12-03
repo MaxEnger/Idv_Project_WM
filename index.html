@@ -10,6 +10,7 @@
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
   <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+<script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
 
   <style type="text/css">
   body{
@@ -145,18 +146,7 @@
   <div class="map-overlay" id="features">
     
   <script>
- 
-    var transformRequest = (url, resourceType) => {
-      var isMapboxRequest =
-        url.slice(8, 22) === "api.mapbox.com" ||
-        url.slice(10, 26) === "tiles.mapbox.com";
-      return {
-        url: isMapboxRequest
-          ? url.replace("?", "?pluginName=sheetMapper&")
-          : url
-      };
-    };
-    
+   
 //Mapbox token 
     mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';//Mapbox token 
     var map = new mapboxgl.Map({
@@ -164,8 +154,7 @@
       style: 'mapbox://styles/menger1/ckh6dsslg10f719mk8ii2gzqu', 
       center: [-96.350098,38.151837],
       zoom: 4,
-      transformRequest: transformRequest
-    });
+          });
 
 map.on('load', function() {
   
@@ -203,16 +192,30 @@ $("document").ready(function () {
     });
 });
 
-const j = "/Idv_Project_WM/Wildfire_Perimeters2.geojson"
-	map.on("load", function() {
-        map.addLayer({
-          id: "fires",
-          type: "FeatureCollection",
-          source: {
-            type: "geojson",
-            data: j
-          }
-        });
+const j = new GeoJsonLayer({
+      data: 'https://github.com/MaxEnger/Idv_Project_WM/blob/main/Wildfire_Perimeters2.geojson',
+      opacity: 0.8,
+      stroked: false,
+      filled: true,
+      extruded: true,
+      wireframe: true,
+
+      getName: f => (f.properties.FIRE_NAME),
+      getFillColor: f => colorScale(f.properties.GIS_ACRES),
+      getLineColor: [255, 255, 255],
+
+      pickable: true
+    });
+// 	  "/Idv_Project_WM/Wildfire_Perimeters2.geojson"
+// 	map.on("load", function() {
+//         map.addLayer({
+//           id: "fires",
+//           type: "FeatureCollection",
+//           source: {
+//             type: "geojson",
+//             data: j
+//           }
+//         });
 
         const pubTypes = j.features.map(feature => feature.properties.FIRE_NAME);
         const uniquePubTypes = Array.from(new Set(pubTypes));
