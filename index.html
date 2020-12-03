@@ -202,13 +202,11 @@ map.on('load', function() {
                 'circle-stroke-width': 1,
                 'circle-opacity': 0.5
               }
-            });
+         		   });
 
-            });
-
-          });
-
-            };
+           	 };
+          };
+	
 	const pubTypes = csvData.features.map(feature => feature.properties.Incident_Name);
         const uniquePubTypes = Array.from(new Set(pubTypes));
         const filterElem = document.getElementById('pubTypeFilter');
