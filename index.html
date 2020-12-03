@@ -207,15 +207,15 @@ const j = new GeoJsonLayer({
       pickable: true
     });
 // 	  "/Idv_Project_WM/Wildfire_Perimeters2.geojson"
-// 	map.on("load", function() {
-//         map.addLayer({
-//           id: "fires",
-//           type: "FeatureCollection",
-//           source: {
-//             type: "geojson",
-//             data: j
-//           }
-//         });
+	map.on("load", function() {
+        map.addLayer({
+          id: "fires",
+          type: "FeatureCollection",
+          source: {
+            type: "geojson",
+            data: j
+          }
+        });
 
         const pubTypes = j.features.map(feature => feature.properties.FIRE_NAME);
         const uniquePubTypes = Array.from(new Set(pubTypes));
@@ -262,8 +262,7 @@ const j = new GeoJsonLayer({
             popup.remove();
           }
         });
-
-	      });
+});
 
 	  
 	 	  
