@@ -11,7 +11,7 @@
   <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
   <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
-<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
 <style>
    <style type="text/css">
   body{
@@ -55,44 +55,7 @@
 		max-width: 50px;
 		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 		}
-.map-overlay {
-font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-position: absolute;
-width: 25%;
-top: 0;
-left: 0;
-padding: 10px;
-}
- 
-.map-overlay .map-overlay-inner {
-background-color: #fff;
-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-border-radius: 3px;
-padding: 10px;
-margin-bottom: 10px;
-}
- 
-.map-overlay h2 {
-line-height: 24px;
-display: block;
-margin: 0 0 10px;
-}
- 
-.map-overlay .legend .bar {
-height: 10px;
-width: 100%;
-background: linear-gradient(to right, #fca107, #7f3121);
-}
- 
-.map-overlay input {
-background-color: transparent;
-display: inline-block;
-width: 100%;
-position: relative;
-margin: 0;
-cursor: ew-resize;
-	
-	
+
  </style>
   <link rel="stylesheet" href="style.css">
   
@@ -107,7 +70,7 @@ cursor: ew-resize;
   	 <li><a href="index.html" target="_self">Overview</a></li>
          <li><a href="perimeters.html" target="_self">Perimeters</a></li>
          <li><a class="active" href="ignitions.html" target="_self">Ignitions</a></li>
-         <li><a href="time.html" target="_self">Time Slider</a></li>
+         <li><a href="ignition_selection.html" target="_self">Output 4</a></li>
       </ul>
     </div>
   </div>
@@ -121,20 +84,7 @@ cursor: ew-resize;
 	
 
 </div>
-    <div class="map-overlay top">
-<div class="map-overlay-inner">
-<h2>Significant earthquakes in 2015</h2>
-<label id="month"></label>
-<input id="slider" type="range" min="0" max="11" step="1" value="0" />
-</div>
-<div class="map-overlay-inner">
-<div id="legend" class="legend">
-<div class="bar"></div>
-<div>Magnitude (m)</div>
-</div>
-</div>
-</div>
-	  
+    
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
       const map = new mapboxgl.Map({
@@ -144,47 +94,6 @@ cursor: ew-resize;
         zoom: 3
       });
 
-	    
-	var years = [
-	        '1992',
-		'1993',
-		'1994',
-		'1996',
-		'1997',
-		'1999',
-		'2000',
-		'2001',
-		'2002',
-		'2003',
-		'2004',
-		'2005',
-		'2006',
-		'2007',
-		'2008',
-		'2009',
-		'2010',
-		'2011',
-		'2012',
-		'2013',
-		'2014',
-		'2015'
-		];    
-	    
-	    
-	function filterBy(years) {
-var filters = ['==', 'FIRE_YEAR', years];
-map.setFilter('earthquake-circles', filters);
-map.setFilter('earthquake-labels', filters);
- 
-// Set the label to the month
-document.getElementById('years').textContent = years[years];
-}    
-	    
-  
-
-
-	    
-	    
       window.map = map;
 
       const geojson = {
