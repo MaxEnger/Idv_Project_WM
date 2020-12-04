@@ -2076,7 +2076,11 @@
             "icon-size": 1.25,
             "icon-allow-overlap": true,
           }
-		map.getCanvas().style.cursor = 'default';
+
+        });
+map.on('load', function() {
+  
+   map.getCanvas().style.cursor = 'default';
 
   var layers = ['0 - 100,524', '100,524 - 200,000', '200,000 - 400,000','500,000+'];
   var colors = ['#f8b435', '#cb6715', '#e31c1c', '#181716'];
@@ -2096,8 +2100,7 @@
   item.appendChild(value);
   legend.appendChild(item);
 }
-        });
-
+});  
 
         const pubTypes = geojson.features.map(feature => feature.properties.INCIDENT);
         const uniquePubTypes = Array.from(new Set(pubTypes));
