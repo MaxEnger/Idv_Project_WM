@@ -80,10 +80,10 @@
     <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
     var map = new mapboxgl.Map({
-      container: 'map', 
-     style: 'mapbox://styles/mapbox/light-v10',
-        center: [-96, 37.8],
-        zoom: 3
+      	     container: 'map', 
+	     style: 'mapbox://styles/mapbox/light-v10',
+             center: [-96, 37.8],
+             zoom: 3
     });
 	
 	 var year = [
@@ -129,14 +129,14 @@
       'circle-radius': [
         'interpolate',
         ['linear'],
-        ['number', ['get', 'year']],
+        ['number', ['get', 'FIRE_YEAR']],
         1992, 2000,
         2001, 2015
       ],
       'circle-color': [
         'interpolate',
         ['exponential',1],
-        ['number', ['get', 'year']],
+        ['number', ['get', 'FIRE_YEAR']],
         1992, '#2DC4B2',
         2000, '#3BB3C3',
         2005, '#669EC4',
@@ -145,14 +145,14 @@
       ],
       'circle-opacity': 0.8
     },
-	filter: ['==', ['number', ['get', 'year']], 5]
+	filter: ['==', ['number', ['get', 'FIRE_YEAR']], 5]
   });
 
   });
   document.getElementById('slider').addEventListener('input', function(e) {
   var year = parseInt(e.target.value);
   // update the map
-  map.setFilter('points', ['==', ['number', ['get', 'year']], year]);
+  map.setFilter('points', ['==', ['number', ['get', 'FIRE_YEAR']], year]);
   // update text in the UI
   document.getElementById('active-year').innerText = year;
 });
