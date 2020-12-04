@@ -5986,25 +5986,26 @@
             "icon-allow-overlap": true,
           }
         });
-        map.on('load', function() {
-           map.addSource("myImageSource", {"type": "image",
-		    "url": "https://studio.mapbox.com/tilesets/menger1.alhjwb06/",
-		     "coordinates": [
-			[-122.855528, 38.479252],
-			[-122.992228, 38.478181],
-			[-122.855885, 38.708751],
-			[-122.990086, 38.708751]
-		     ]})
+	      
+//         map.on('load', function() {
+//            map.addSource("myImageSource", {"type": "image",
+// 		    "url": "https://studio.mapbox.com/tilesets/menger1.alhjwb06/",
+// 		     "coordinates": [
+// 			[-122.855528, 38.479252],
+// 			[-122.992228, 38.478181],
+// 			[-122.855885, 38.708751],
+// 			[-122.990086, 38.708751]
+// 		     ]})
 
-          map.addLayer({
-                "id": "overlay",
-                "source": "myImageSource",
-                "type": "raster",
-                "paint": {
-                "raster-opacity": 0.85
-                }
-            });
-	});
+//           map.addLayer({
+//                 "id": "overlay",
+//                 "source": "myImageSource",
+//                 "type": "raster",
+//                 "paint": {
+//                 "raster-opacity": 0.85
+//                 }
+//             });
+	
     
 	  </script>
 
