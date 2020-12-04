@@ -86,7 +86,37 @@
         zoom: 3
     });
 	
-	
+	 var year = [
+		'1992',
+		'1993',
+		'1994',
+		'1996',
+		'1997',
+		'1999',
+		'2000',
+		'2001',
+		'2002',
+		'2003',
+		'2004',
+		'2005',
+		'2006',
+		'2007',
+		'2008',
+		'2009',
+		'2010',
+		'2011',
+		'2012',
+		'2013',
+		'2014',
+		'2015'
+    ];
+	     function filterBy(year) {
+        var filters = ['==', 'FIRE_YEAR', year];
+        map.setFilter('places', filters);
+
+        // Set the label to the month
+        document.getElementById('FIRE_YEAR').textContent = year[year];
+    }
     map.on('load', function() {
     map.addLayer({
     id: 'points',
@@ -99,14 +129,14 @@
       'circle-radius': [
         'interpolate',
         ['linear'],
-        ['number', ['get', 'FIRE_YEAR']],
+        ['number', ['get', 'year']],
         1992, 2000,
         2001, 2015
       ],
       'circle-color': [
         'interpolate',
         ['exponential',1],
-        ['number', ['get', 'FIRE_YEAR']],
+        ['number', ['get', 'year']],
         1992, '#2DC4B2',
         2000, '#3BB3C3',
         2005, '#669EC4',
@@ -115,7 +145,7 @@
       ],
       'circle-opacity': 0.8
     },
-	filter: ['==', ['number', ['get', 'FIRE_YEAR']], 5]
+	filter: ['==', ['number', ['get', 'year']], 5]
   });
 
   });
