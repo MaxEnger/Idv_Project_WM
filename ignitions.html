@@ -55,6 +55,28 @@
 		max-width: 50px;
 		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 		}
+	#features {
+        top: 0;
+        height: 100px;
+        margin-top: 20px;
+        width: 250px;
+      }
+	 #legend {
+      padding: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      line-height: 18px;
+      height: 90px;
+      margin-bottom: 150px;
+      width: 200px;
+    }
+
+    .legend-key {
+      display: inline-block;
+      border-radius: 20%;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+    }
 
  </style>
   <link rel="stylesheet" href="style.css">
@@ -89,7 +111,7 @@
       mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
       const map = new mapboxgl.Map({
         container: "map",
-        style: 'mapbox://styles/mapbox/light-v10',
+        style: 'mapbox://styles/menger1/ckh6dsslg10f719mk8ii2gzqu',
         center: [-96, 37.8],
         zoom: 3
       });
@@ -303,7 +325,29 @@
             "icon-allow-overlap": true,
           }
         });
+map.on('load', function() {
+  
+   map.getCanvas().style.cursor = 'default';
 
+  var layers = ['0 - 100,524', '100,524 - 200,000', '200,000 - 400,000','500,000+'];
+  var colors = ['#f8b435', '#cb6715', '#e31c1c', '#181716'];
+  
+  //create legend
+  for (i = 0; i < layers.length; i++) {
+  var layer = layers[i];
+  var color = colors[i];
+  var item = document.createElement('div');
+  var key = document.createElement('span');
+  key.className = 'legend-key';
+  key.style.backgroundColor = color;
+
+  var value = document.createElement('span');
+  value.innerHTML = layer;
+  item.appendChild(key);
+  item.appendChild(value);
+  legend.appendChild(item);
+}
+});  
 
         const pubTypes = geojson.features.map(feature => feature.properties.STAT_CAU_1);
         const uniquePubTypes = Array.from(new Set(pubTypes));
