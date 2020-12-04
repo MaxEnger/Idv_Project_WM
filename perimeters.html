@@ -2,7 +2,9 @@
 <html>
 
 <head>
+	
   <meta charset='utf-8' />
+  <title>Final Individual Project</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
   <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
@@ -10,7 +12,8 @@
   <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
 
-  <style type="text/css">
+<style>
+   <style type="text/css">
   body{
       background-color: #f1f8ff;
     }
@@ -37,9 +40,9 @@
      height: 700px;
       width:100%;
     }
-  .map-overlay {
+   .map-overlay {
         position: absolute;
-        bottom: 100;
+        bottom: 0;
         right: 0;
         background: rgba(255, 255, 255, 0.8);
         margin-right: 20px;
@@ -49,213 +52,3316 @@
       }
     
     .mapboxgl-popup {
-      padding-bottom: 5px;
-    }
+		max-width: 50px;
+		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+		}
 
-    .mapboxgl-popup-close-button {
-      display: none;
-    }
-
-    .mapboxgl-popup-content {
-      font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
-      padding: 0;
-      width: 250px;
-    }
-
-    .mapboxgl-popup-content-wrapper {
-      padding: 1%;
-    }
-
-    .mapboxgl-popup-content h3 {
-      background: rgb(61, 59, 59);
-      text-align: center;
-      color: #fff;
-      margin: 0;
-      display: block;
-      padding: 15px;
-      font-weight: 700;
-      margin-top: -5px;
-    }
-
-    .mapboxgl-popup-content h4 {
-      margin: 0;
-      display: block;
-      padding: 10px 3px 10px 10px;
-      font-weight: 400;
-    }
-
-    .mapboxgl-container {
-      cursor: pointer;
-    }
-
-    .mapboxgl-popup-anchor-top>.mapboxgl-popup-content {
-      margin-top: 3px;
-    }
-
-    .mapboxgl-popup-anchor-top>.mapboxgl-popup-tip {
-      border-bottom-color: rgb(61, 59, 59);
-    }
-     #legend {
-      padding: 10px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-      line-height: 18px;
-      height: 90px;
-      margin-bottom: 150px;
-      width: 200px;
-    }
-
-    .legend-key {
-      display: inline-block;
-      border-radius: 20%;
-      width: 10px;
-      height: 10px;
-      margin-right: 5px;
-    }
-    
-  </style>
+ </style>
   <link rel="stylesheet" href="style.css">
+  
 </head>
 
-<body>
-<h1>Wildfire Perimeters (>= 100,000 Acres)</h1> 
-   
-<div class="container">
+  <body>
+    <h1>Wildfire Ignitions (>=100,000 Acres)</h1> 
+  	  
+    <div class="container">
     <div class="center">
       <ul>
-  	  <li><a href="index.html" target="_self">Overview</a></li>
-          <li><a class="active" href="perimeters.html" target="_self">Perimeters</a></li>
-    	  <li><a href="ignitions.html" target="_self">Ignitions</a></li>
-	  <li><a href="time.html" target="_self">Time Slider</a></li>      </ul>
+  	 <li><a href="index.html" target="_self">Overview</a></li>
+         <li><a href="perimeters.html" target="_self">Perimeters</a></li>
+         <li><a class="active" href="ignitions.html" target="_self">Ignitions</a></li>
+         <li><a href="ignition_selection.html" target="_self">Output 4</a></li>
+      </ul>
     </div>
   </div>
   <br>
-  
-	<div class='map-overlay' id='legend'></div>
-
-   <div id="map"> 
+	  
+	  
+<div id="map"> 
      <select id="pubTypeFilter" name="pubTypeFilter" style="z-index: 999; position: absolute; top: 0;">
-      <option value="">Select Wildfire Incident</option>
-      </select>
-	</div>
-    	<div class='map-overlay' id='legend'></div>
-
+      <option value="">Select Ignition Type</option>
+    </select>
 	
-  <script>
- 
-    var transformRequest = (url, resourceType) => {
-      var isMapboxRequest =
-        url.slice(8, 22) === "api.mapbox.com" ||
-        url.slice(10, 26) === "tiles.mapbox.com";
-      return {
-        url: isMapboxRequest
-          ? url.replace("?", "?pluginName=sheetMapper&")
-          : url
-      };
-    };
-    //Mapbox token 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';//Mapbox token 
-    var map = new mapboxgl.Map({
-      container: 'map', 
-      style: 'mapbox://styles/menger1/ckh6dsslg10f719mk8ii2gzqu', 
-      center: [-96.350098,38.151837],
-      zoom: 4,
-      transformRequest: transformRequest
-    });
-map.on('load', function() {
-  
-   map.getCanvas().style.cursor = 'default';
 
-  var layers = ['0 - 100,524', '100,524 - 200,000', '200,000 - 400,000','500,000+'];
-  var colors = ['#f8b435', '#cb6715', '#e31c1c', '#181716'];
-  
-  //create legend
-  for (i = 0; i < layers.length; i++) {
-  var layer = layers[i];
-  var color = colors[i];
-  var item = document.createElement('div');
-  var key = document.createElement('span');
-  key.className = 'legend-key';
-  key.style.backgroundColor = color;
-
-  var value = document.createElement('span');
-  value.innerHTML = layer;
-  item.appendChild(key);
-  item.appendChild(value);
-  legend.appendChild(item);
-}
-});  
-    $(document).ready(function () {
-      $.ajax({
-        type: "GET",
-        url:'https://docs.google.com/spreadsheets/d/1gkivKbkW5-4EQ2GC9QnICrkv9ZX2oXa_ACB_d4MCq9w/gviz/tq?tqx=out:csv&sheet=perimeters_100_final',
-        dataType: "text",
-        success: function (csvData) { makeGeoJSON(csvData); }
+</div>
+    
+    <script>
+      mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
+      const map = new mapboxgl.Map({
+        container: "map",
+        style: 'mapbox://styles/mapbox/light-v10',
+        center: [-96, 37.8],
+        zoom: 3
       });
 
-      function makeGeoJSON(csvData) {
-        csv2geojson.csv2geojson(csvData, {
-          latfield: 'lat',
-          lonfield: 'lon',
-          delimiter: ','
-        }, function (err, data) {
-          map.on('load', function () {
+      window.map = map;
 
-            //Add the the layer to the map 
-            map.addLayer({
-              'id': 'csvData',
-              'type': 'circle',
-              'source': {
-                'type': 'geojson',
-                'data': data
-              },
-              'paint': {
-                'circle-radius': 3,
-                'circle-color': '#e848d5',
-                'circle-stroke-color': 'white',
-                'circle-stroke-width': 1,
-                'circle-opacity': 0.5
-              }
-            });
+      const geojson = {
+        id: "places",
+        type: "FeatureCollection",
+        features: [
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 62.44997092,-156.9410712 ]
+    },
+    "properties": {
+    "FID":0,
+    "FID_1":203,
+    "OBJECTID":0,
+    "MAP_METHOD":" ",
+    "DATE_CUR":201307000000,
+    "COMMENTS":"aerial gps, 139 and 131 cilpped out by gschmunk as that acreage stays with those fires.",
+    "GEO_ID":"140",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"36244",
+    "INCIDENT":"Moore Creek",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":157747.3,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 64.28232233,-150.7462455 ]
+    },
+    "properties": {
+    "FID":1,
+    "FID_1":2317,
+    "OBJECTID":0,
+    "MAP_METHOD":" ",
+    "DATE_CUR":201610000000,
+    "COMMENTS":"Perimeter edited to remove overlap with adjacent fires.",
+    "GEO_ID":"128",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2010,
+    "LOCAL_NUM":"33044",
+    "INCIDENT":"Toklat",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":133857,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 61.54647151,-155.4888806 ]
+    },
+    "properties": {
+    "FID":2,
+    "FID_1":2367,
+    "OBJECTID":0,
+    "MAP_METHOD":"Fixed Wing",
+    "DATE_CUR":201306000000,
+    "COMMENTS":"aerial gps with slow moving Beaver, lesser smoke levels allowed for closer gps",
+    "GEO_ID":"144",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"36248",
+    "INCIDENT":"Lime Hills",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":201808.2,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 64.41956569,-154.5350616 ]
+    },
+    "properties": {
+    "FID":3,
+    "FID_1":2509,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201508000000,
+    "COMMENTS":"Perimeter updated using Landsat 8 and Viirs  i-band data.",
+    "GEO_ID":"533",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38353",
+    "INCIDENT":"Big Creek Two",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":312918.2,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 60.33843424,-150.790036 ]
+    },
+    "properties": {
+    "FID":4,
+    "FID_1":2545,
+    "OBJECTID":0,
+    "MAP_METHOD":"Helicopter",
+    "DATE_CUR":201406000000,
+    "COMMENTS":"Perimeter was collect by gps from helicopter",
+    "GEO_ID":"140",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2014,
+    "LOCAL_NUM":"37271",
+    "INCIDENT":"Funny River",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":196610.1,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 65.01477269,-153.5476012 ]
+    },
+    "properties": {
+    "FID":5,
+    "FID_1":2762,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Perimeter updated using Landsat 7 data.  A detection flight confirmed that the southern portion of the fire was overmapped.",
+    "GEO_ID":"481",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38298",
+    "INCIDENT":"Bering Creek",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":112806.8,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 64.05470848,-153.7522157 ]
+    },
+    "properties": {
+    "FID":6,
+    "FID_1":2845,
+    "OBJECTID":0,
+    "MAP_METHOD":"Other",
+    "DATE_CUR":201508000000,
+    "COMMENTS":"Perimeter updated using Landsat 8.",
+    "GEO_ID":"367",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38188",
+    "INCIDENT":"Sea",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":111193.9,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 63.70191243,-152.9291229 ]
+    },
+    "properties": {
+    "FID":7,
+    "FID_1":2877,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Digitized from Landsat8 image dated 9/1/15",
+    "GEO_ID":"703",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38548",
+    "INCIDENT":"Munsatli 2",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":100524,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 64.68409385,-152.6945009 ]
+    },
+    "properties": {
+    "FID":8,
+    "FID_1":2892,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Digitized from Landsat8 image dated 9/1/15",
+    "GEO_ID":"469",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38288",
+    "INCIDENT":"Big Mud River 1",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":103967.5,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 65.96304486,-154.7245343 ]
+    },
+    "properties": {
+    "FID":9,
+    "FID_1":2945,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Perimeter updated with Landsat 8 data.",
+    "GEO_ID":"471",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38290",
+    "INCIDENT":"Isahultila",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":149359.3,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 65.16824836,-156.2043325 ]
+    },
+    "properties": {
+    "FID":10,
+    "FID_1":2959,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Perimeter updated using Landsat 8 data.",
+    "GEO_ID":"539",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38360",
+    "INCIDENT":"Holtnakatna",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":223154.1,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 63.47117442,-157.4740023 ]
+    },
+    "properties": {
+    "FID":11,
+    "FID_1":3005,
+    "OBJECTID":0,
+    "MAP_METHOD":" ",
+    "DATE_CUR":201508000000,
+    "COMMENTS":"Perimeter submitted by Galena Zone.  Blazo consumed 761 Hammer Creek.",
+    "GEO_ID":"362",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38182",
+    "INCIDENT":"Blazo",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":121339.2,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 65.8011631,-153.470098 ]
+    },
+    "properties": {
+    "FID":12,
+    "FID_1":3044,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Digitized from Landsat8 image dated 9/1/15. Only updated east side of fire.",
+    "GEO_ID":"449",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38269",
+    "INCIDENT":"Sushgitit Hills",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":276038.2,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 66.02225633,-154.0641767 ]
+    },
+    "properties": {
+    "FID":13,
+    "FID_1":3046,
+    "OBJECTID":0,
+    "MAP_METHOD":"Image",
+    "DATE_CUR":201509000000,
+    "COMMENTS":"Perimeter updated using Landsat 7 data.",
+    "GEO_ID":"336",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"38151",
+    "INCIDENT":"Rock",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":142650.4,
+    "USER_NAME":" ",
+    "SOURCE":"AFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 36.32612781,-121.7216652 ]
+    },
+    "properties": {
+    "FID":14,
+    "FID_1":12378,
+    "OBJECTID":0,
+    "MAP_METHOD":"1",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"19208",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2016,
+    "LOCAL_NUM":"3422",
+    "INCIDENT":"SOBERANES",
+    "UNIT_ID":"BEU",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":132104.3,
+    "USER_NAME":" ",
+    "SOURCE":"CalFire FRAP",
+    "AGENCY":"CDF"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.75163699,-121.5591326 ]
+    },
+    "properties": {
+    "FID":15,
+    "FID_1":12960,
+    "OBJECTID":0,
+    "MAP_METHOD":"1",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"20730",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"16737",
+    "INCIDENT":"CAMP",
+    "UNIT_ID":"BTU",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":153335.6,
+    "USER_NAME":" ",
+    "SOURCE":"CalFire FRAP",
+    "AGENCY":"CDF"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.70206562,-122.5877314 ]
+    },
+    "properties": {
+    "FID":16,
+    "FID_1":13018,
+    "OBJECTID":0,
+    "MAP_METHOD":"1",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"20788",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"7808",
+    "INCIDENT":"CARR",
+    "UNIT_ID":"SHU",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":229651.4,
+    "USER_NAME":" ",
+    "SOURCE":"CalFire FRAP",
+    "AGENCY":"CDF"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.28726178,-122.7680298 ]
+    },
+    "properties": {
+    "FID":17,
+    "FID_1":13197,
+    "OBJECTID":0,
+    "MAP_METHOD":"7",
+    "DATE_CUR":,
+    "COMMENTS":"MENDOCINO_COMPLEX",
+    "GEO_ID":"20967",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"8646",
+    "INCIDENT":"RANCH",
+    "UNIT_ID":"LNU",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":410202.5,
+    "USER_NAME":" ",
+    "SOURCE":"CalFire FRAP",
+    "AGENCY":"CDF"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 30.77678898,-82.29707599 ]
+    },
+    "properties": {
+    "FID":18,
+    "FID_1":18907,
+    "OBJECTID":0,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20111017,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"1",
+    "INCIDENT":"Honey Prairie",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":328492,
+    "USER_NAME":" ",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 32.2311787,-102.8960532 ]
+    },
+    "properties": {
+    "FID":19,
+    "FID_1":19201,
+    "OBJECTID":0,
+    "MAP_METHOD":"Digitized-Image",
+    "DATE_CUR":20110416,
+    "COMMENTS":" ",
+    "GEO_ID":"291547",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"11098",
+    "INCIDENT":"Frying Pan Ranch",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":144830,
+    "USER_NAME":"Amanda McAdams",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 30.22517988,-101.2410228 ]
+    },
+    "properties": {
+    "FID":20,
+    "FID_1":19214,
+    "OBJECTID":0,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"297534",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"11125",
+    "INCIDENT":"Deaton Cole",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":160390,
+    "USER_NAME":"Parmecia Jones",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 30.72239929,-102.0246681 ]
+    },
+    "properties": {
+    "FID":21,
+    "FID_1":19494,
+    "OBJECTID":0,
+    "MAP_METHOD":"Digitized-Image",
+    "DATE_CUR":20110416,
+    "COMMENTS":" ",
+    "GEO_ID":"291554",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"11090",
+    "INCIDENT":"Cannon Group (Fourmile Draw)",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":140780,
+    "USER_NAME":"Amanda McAdams",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 33.36588154,-100.1498096 ]
+    },
+    "properties": {
+    "FID":22,
+    "FID_1":20301,
+    "OBJECTID":0,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":20110421,
+    "COMMENTS":" ",
+    "GEO_ID":"293610",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"11071",
+    "INCIDENT":"Swenson",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":131180,
+    "USER_NAME":"Edie Sellers",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 32.781505,-98.52763195 ]
+    },
+    "properties": {
+    "FID":23,
+    "FID_1":20447,
+    "OBJECTID":0,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":20110428,
+    "COMMENTS":" ",
+    "GEO_ID":"296012",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"11099",
+    "INCIDENT":"PK East (PK Complex)",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":126710,
+    "USER_NAME":"Parmecia Jones",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 32.9443183,-100.6646298 ]
+    },
+    "properties": {
+    "FID":24,
+    "FID_1":20448,
+    "OBJECTID":0,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":20110422,
+    "COMMENTS":" ",
+    "GEO_ID":"293858",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"11087",
+    "INCIDENT":"Wildcat",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":150510,
+    "USER_NAME":"Marlena Hovorka",
+    "SOURCE":"WFDSS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 45.82177423,-106.4503779 ]
+    },
+    "properties": {
+    "FID":25,
+    "FID_1":20483,
+    "OBJECTID":0,
+    "MAP_METHOD":"GPS / Air",
+    "DATE_CUR":20170906,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"543",
+    "INCIDENT":"Sartin Draw",
+    "UNIT_ID":"MTMCD",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":285420,
+    "USER_NAME":"Eric Lepisto",
+    "SOURCE":"WFDSS",
+    "AGENCY":"BLM"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 30.63069968,-82.29342669 ]
+    },
+    "properties": {
+    "FID":26,
+    "FID_1":20550,
+    "OBJECTID":0,
+    "MAP_METHOD":"Infrared",
+    "DATE_CUR":20170519,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"17006",
+    "INCIDENT":"WEST MIMS",
+    "UNIT_ID":"GAOKR",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":152290,
+    "USER_NAME":"Annie Benoit",
+    "SOURCE":"WFDSS",
+    "AGENCY":"USFWS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.09596908,-99.90438902 ]
+    },
+    "properties": {
+    "FID":27,
+    "FID_1":20649,
+    "OBJECTID":0,
+    "MAP_METHOD":"GPS / Air",
+    "DATE_CUR":20170313,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"527",
+    "INCIDENT":"OKS - Starbuck",
+    "UNIT_ID":"OKOKS",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":662580,
+    "USER_NAME":"Stewart Turner",
+    "SOURCE":"WFDSS",
+    "AGENCY":"State"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.14632665,-105.2711888 ]
+    },
+    "properties": {
+    "FID":28,
+    "FID_1":21400,
+    "OBJECTID":733,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201703000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{FE3EBC11-C3A5-4761-AE2A-D4DD076D6CB0}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"9999-CORGD-000000",
+    "FIRE_YEAR":9999,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Unknown",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":138287.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.14632665,-105.2711888 ]
+    },
+    "properties": {
+    "FID":29,
+    "FID_1":21401,
+    "OBJECTID":734,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201703000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{128E2E87-1C58-42D6-AE90-7978ED24EF27}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"9999-CORGD-000000",
+    "FIRE_YEAR":9999,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Unknown",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":138287.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 36.97657442,-104.4064445 ]
+    },
+    "properties": {
+    "FID":30,
+    "FID_1":21627,
+    "OBJECTID":960,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{C9562FC9-6644-4DA4-833E-B0774B5D5E14}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000000",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Track Fire",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":1136312,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.226319,-104.0200399 ]
+    },
+    "properties": {
+    "FID":31,
+    "FID_1":21628,
+    "OBJECTID":961,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{77441295-5019-4B60-A18E-5F4B9B117988}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000000",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Purgatoire",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":248475.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 38.07460465,-103.0684758 ]
+    },
+    "properties": {
+    "FID":32,
+    "FID_1":21629,
+    "OBJECTID":962,
+    "MAP_METHOD":"Hand Sketch",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{D9D7A294-75D5-4F08-B8C4-24D5C1D15306}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000382",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"382",
+    "INCIDENT":"Fort Lyon",
+    "UNIT_ID":"USCOBNX",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":781001.4,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.79774039,-103.371092 ]
+    },
+    "properties": {
+    "FID":33,
+    "FID_1":21631,
+    "OBJECTID":964,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{7AC10F23-F7F9-4172-8F38-30DFD1E5182E}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000000",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Salt Fire",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":166977.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.149066,-101.8106939 ]
+    },
+    "properties": {
+    "FID":34,
+    "FID_1":21645,
+    "OBJECTID":978,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{A8F4AFC5-CC8B-4011-8A4A-C8A43533A52A}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000556",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"556",
+    "INCIDENT":"Tunner",
+    "UNIT_ID":"USCOPSF",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":795469.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 38.70526289,-103.6248171 ]
+    },
+    "properties": {
+    "FID":35,
+    "FID_1":21651,
+    "OBJECTID":984,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{CE826DEA-39EB-4818-93D3-5E119F80C423}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000268",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"268",
+    "INCIDENT":"KARVAL",
+    "UNIT_ID":"USCOLCX",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":187303.1,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.45030505,-105.1948708 ]
+    },
+    "properties": {
+    "FID":36,
+    "FID_1":21653,
+    "OBJECTID":986,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{C66484C1-F7D2-47E6-A2A1-99C8AF6031CF}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-CORGD-000176",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"176",
+    "INCIDENT":"Lower North Fork",
+    "UNIT_ID":"USCOJEX",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":130208,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.35563867,-105.6503854 ]
+    },
+    "properties": {
+    "FID":37,
+    "FID_1":21662,
+    "OBJECTID":995,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201705000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{7007F1F5-8F75-44AD-92DC-82790CF4A87B}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-CORGD-000975",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"975",
+    "INCIDENT":"Fern Lake",
+    "UNIT_ID":"USCORMP",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":141441.8,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.55748078,-105.3141819 ]
+    },
+    "properties": {
+    "FID":38,
+    "FID_1":21663,
+    "OBJECTID":996,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201703000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{C15241F7-767E-4E2D-9FD8-18C242D38D60}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-CORGD-000000",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Crystal",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":118851.7,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.59938145,-115.2784025 ]
+    },
+    "properties": {
+    "FID":39,
+    "FID_1":21861,
+    "OBJECTID":1194,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":999909000000,
+    "COMMENTS":"Digitized from IR Imagery - REMOVED IMPACT AREA",
+    "GEO_ID":"{85CA2263-93F0-4320-B4AE-EEB6E2D53DFE}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-IDJRD-000263",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"263",
+    "INCIDENT":"KINYON ROAD",
+    "UNIT_ID":"USIDTFD",
+    "POO_RESP_I":"USIDTFD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":210827.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.01199366,-113.8249006 ]
+    },
+    "properties": {
+    "FID":40,
+    "FID_1":21875,
+    "OBJECTID":1208,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":999909000000,
+    "COMMENTS":"GPS - Flight for North section and driven for southern part",
+    "GEO_ID":"{8CBFD9BD-B705-49D5-AB02-74DB610C7E6D}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-IDSHD-000424",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"424",
+    "INCIDENT":"FLAT TOP 2",
+    "UNIT_ID":"USIDTFD",
+    "POO_RESP_I":"USIDTFD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":140723,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.48225698,-115.4529326 ]
+    },
+    "properties": {
+    "FID":41,
+    "FID_1":22042,
+    "OBJECTID":1375,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":"FIMT data refined by BAER Team",
+    "GEO_ID":"{90F709D2-A165-4246-B1FE-F0EB9A287BEA}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2013-IDFRD-001053",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"1053",
+    "INCIDENT":"ELK COMPLEX",
+    "UNIT_ID":"USIDBOF",
+    "POO_RESP_I":"USIDBOF",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":130953.8,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.38466228,-115.6851672 ]
+    },
+    "properties": {
+    "FID":42,
+    "FID_1":22043,
+    "OBJECTID":1376,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":"5 fires MM102HWY20, MM11HWY20, Long Tom, MM105Hwy20, Mudd. Refined with aerial photo 2S8E, 2S6E area",
+    "GEO_ID":"{4927FB8C-E6ED-4DD9-B8E3-53C73ACCA5A8}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2013-IDFRD-001047",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"1047",
+    "INCIDENT":"PONY COMPLEX",
+    "UNIT_ID":"USIDBOD",
+    "POO_RESP_I":"USIDBOD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":150449.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.58604714,-114.5364944 ]
+    },
+    "properties": {
+    "FID":43,
+    "FID_1":22044,
+    "OBJECTID":1377,
+    "MAP_METHOD":"Remote Sensing Derived",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{676FB370-5764-43DB-8FBF-75C93DF0D00A}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2013-IDSHD-000337",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"337",
+    "INCIDENT":"Beaver Creek",
+    "UNIT_ID":"USIDTFD",
+    "POO_RESP_I":"USIDTFD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":111393.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.32941823,-116.9137014 ]
+    },
+    "properties": {
+    "FID":44,
+    "FID_1":22237,
+    "OBJECTID":1570,
+    "MAP_METHOD":"Remote Sensing Derived",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{8F275F5B-7099-4671-9F8F-4F656DA2E696}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2015-IDOYD-000889",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"889",
+    "INCIDENT":"SODA",
+    "UNIT_ID":"USIDPRI",
+    "POO_RESP_I":"USIDBOD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":279144,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.66519928,-115.1636264 ]
+    },
+    "properties": {
+    "FID":45,
+    "FID_1":27668,
+    "OBJECTID":7001,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{D768F565-91AD-408B-9CD3-5E1D09EB217B}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2010-IDJRD-000387",
+    "FIRE_YEAR":2010,
+    "LOCAL_NUM":"387",
+    "INCIDENT":"LONG BUTTE",
+    "UNIT_ID":"USIDTFD",
+    "POO_RESP_I":"USIDTFD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":305994.6,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.67958177,-112.5685526 ]
+    },
+    "properties": {
+    "FID":46,
+    "FID_1":27761,
+    "OBJECTID":7094,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{95762D99-BE57-4947-802B-9732A8FCF85C}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2010-IDIFD-010010",
+    "FIRE_YEAR":2010,
+    "LOCAL_NUM":"10010",
+    "INCIDENT":"JEFFERSON",
+    "UNIT_ID":"USIDINE",
+    "POO_RESP_I":"USIDIFD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":108847.6,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 45.75239683,-106.7968619 ]
+    },
+    "properties": {
+    "FID":47,
+    "FID_1":27989,
+    "OBJECTID":7322,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201510000000,
+    "COMMENTS":"Corrected GPS coordinates or equivalent precision",
+    "GEO_ID":"{D8223E27-169B-42C5-9661-88BB8E40F457}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-MTMCD-000000",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Chalky",
+    "UNIT_ID":"USMTNRC",
+    "POO_RESP_I":"USMTMCD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":132875.6,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 45.65212535,-106.1359247 ]
+    },
+    "properties": {
+    "FID":48,
+    "FID_1":28488,
+    "OBJECTID":7821,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201510000000,
+    "COMMENTS":"  IR Type: Heat",
+    "GEO_ID":"{1D02268C-C8E2-43E6-8D70-126F6A1364E5}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-MTNCA-000000",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Ash Creek",
+    "UNIT_ID":"USMTNRC",
+    "POO_RESP_I":"USMTNCA",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":249713.1,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.96865919,-116.2378465 ]
+    },
+    "properties": {
+    "FID":49,
+    "FID_1":29848,
+    "OBJECTID":9181,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":,
+    "COMMENTS":"Elko Co. 90372.85 / Eureka Co. 20453.84",
+    "GEO_ID":"{51DE2D31-AF9D-46A7-A363-DE3158D81DA8}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2011-NVEKD-001336",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"1336",
+    "INCIDENT":"Indian Creek",
+    "UNIT_ID":"USNVNNS",
+    "POO_RESP_I":"USNVNNS",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":110827.1,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.01177719,-118.2537382 ]
+    },
+    "properties": {
+    "FID":50,
+    "FID_1":29909,
+    "OBJECTID":9242,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":,
+    "COMMENTS":"675.590 sq mi",
+    "GEO_ID":"{E710E76A-3049-40BC-AFD4-89BB83EB1D7D}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-NVWID-020210",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"20210",
+    "INCIDENT":"Holloway",
+    "UNIT_ID":"USNVWID",
+    "POO_RESP_I":"USNVWID",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":460842.9,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.61720466,-120.0914775 ]
+    },
+    "properties": {
+    "FID":51,
+    "FID_1":31796,
+    "OBJECTID":11129,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":,
+    "COMMENTS":"Fire perimeter obtained from MTBS - S. Levitt 5/6/2016",
+    "GEO_ID":"{C4B34696-7255-4A27-8243-E561F9267DEB}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-CANOD-003490",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"3490",
+    "INCIDENT":"Rush",
+    "UNIT_ID":"USCANOD",
+    "POO_RESP_I":"USCANOD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":307083,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.06944221,-116.8982867 ]
+    },
+    "properties": {
+    "FID":52,
+    "FID_1":32016,
+    "OBJECTID":11349,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{BB26C2F0-BF4D-4405-BE69-DB8AD76034C1}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2016-NVEKD-010080",
+    "FIRE_YEAR":2016,
+    "LOCAL_NUM":"10080",
+    "INCIDENT":"Hot Pot",
+    "UNIT_ID":"USNVNNS",
+    "POO_RESP_I":"USNVEKD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":122292.7,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.9451921,-116.6300407 ]
+    },
+    "properties": {
+    "FID":53,
+    "FID_1":32176,
+    "OBJECTID":11509,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{673B3238-7AE3-41E5-BC68-3D604DBB537D}",
+    "IRWINID":"B4E7576E-8B55-4B5C-B44E-9B7055279B52",
+    "UNQE_FIRE_":"2017-NVNNS-010193",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"10193",
+    "INCIDENT":"Roosters Comb",
+    "UNIT_ID":"USNVNNS",
+    "POO_RESP_I":"USNVNNS",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":204879.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.4678116,-116.6883384 ]
+    },
+    "properties": {
+    "FID":54,
+    "FID_1":32190,
+    "OBJECTID":11523,
+    "MAP_METHOD":"Digitized-Topo",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{F073C45D-2406-4FB2-8726-0D5FA0D862F1}",
+    "IRWINID":"38553146-FA6B-48DA-8866-EABA844107B8",
+    "UNQE_FIRE_":"2017-NVEKD-010220",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"10220",
+    "INCIDENT":"Snowstorm",
+    "UNIT_ID":"USNVEKD",
+    "POO_RESP_I":"USNVEKD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":154454.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.01151077,-118.2533038 ]
+    },
+    "properties": {
+    "FID":55,
+    "FID_1":34117,
+    "OBJECTID":13450,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{2337765C-0AF5-47BA-9425-64D20B95D1C7}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-ORVAD-000000",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"HOLLOWAY",
+    "UNIT_ID":"USORVAD",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":448547,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.89433143,-119.0470173 ]
+    },
+    "properties": {
+    "FID":56,
+    "FID_1":36919,
+    "OBJECTID":16252,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{C372F7B4-3D6C-4E08-9A8E-B0CEBE397CFA}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-ORBUD-020072",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"20072",
+    "INCIDENT":"Miller Homestead",
+    "UNIT_ID":"USORBUD",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":138251.4,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.30279347,-118.0966877 ]
+    },
+    "properties": {
+    "FID":57,
+    "FID_1":37239,
+    "OBJECTID":16572,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{7D2A7A59-811D-4771-8B53-7C5DF5E39FD6}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2014-ORVAD-000067",
+    "FIRE_YEAR":2014,
+    "LOCAL_NUM":"67",
+    "INCIDENT":"Saddle Draw",
+    "UNIT_ID":"USORVAD",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":159209.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 48.1713081,-120.1022091 ]
+    },
+    "properties": {
+    "FID":58,
+    "FID_1":37319,
+    "OBJECTID":16652,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{B7242724-3249-4882-8290-87FBC310CBE2}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2014-WANES-000487",
+    "FIRE_YEAR":2014,
+    "LOCAL_NUM":"487",
+    "INCIDENT":"Carlton",
+    "UNIT_ID":"USWANES",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":230101.7,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 44.29202452,-118.8393831 ]
+    },
+    "properties": {
+    "FID":59,
+    "FID_1":37472,
+    "OBJECTID":16805,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{5DF62BC1-0B09-49EA-9026-5A4A1C5B84D7}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2015-ORMAF-000000",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Canyon Creek",
+    "UNIT_ID":"USORMAF",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":107288.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.32942968,-116.9138289 ]
+    },
+    "properties": {
+    "FID":60,
+    "FID_1":37495,
+    "OBJECTID":16828,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{C0A42688-A13C-462C-B0FD-08862E26D2ED}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2015-IDBOD-000000",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"SODA",
+    "UNIT_ID":"USIDBOD",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":235689.9,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 48.48168416,-119.3521951 ]
+    },
+    "properties": {
+    "FID":61,
+    "FID_1":37638,
+    "OBJECTID":16971,
+    "MAP_METHOD":"GPS-Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{0CE56B7F-FD23-4F19-8967-78C7D73A5FBB}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2015-WANES-001219",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"1219",
+    "INCIDENT":"Tunk Block",
+    "UNIT_ID":"USWANES",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":138368.7,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 48.50004316,-119.6781578 ]
+    },
+    "properties": {
+    "FID":62,
+    "FID_1":37641,
+    "OBJECTID":16974,
+    "MAP_METHOD":"GPS-Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{4F3F3845-6FA1-4ED9-A65C-B4599E29DC78}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2015-WAOWF-000657",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"657",
+    "INCIDENT":"Lime Belt",
+    "UNIT_ID":"USWAOWF",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":120526.6,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.24221613,-124.0553903 ]
+    },
+    "properties": {
+    "FID":63,
+    "FID_1":38251,
+    "OBJECTID":18040,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{4371730E-8C55-425B-9AAC-92C77A74B406}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-ORRSF-000326",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"326",
+    "INCIDENT":"Chetco Bar",
+    "UNIT_ID":"USORRSF",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":190524.5,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.40541028,-112.2307082 ]
+    },
+    "properties": {
+    "FID":64,
+    "FID_1":39949,
+    "OBJECTID":19738,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{DE7C988B-1BDA-4E0F-BF33-A985FEB15A6E}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-UTSLD-1511313",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"1511313",
+    "INCIDENT":"Clay Springs",
+    "UNIT_ID":"USUTSLD",
+    "POO_RESP_I":"USUTSLD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":107766.9,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.61374827,-120.0921295 ]
+    },
+    "properties": {
+    "FID":65,
+    "FID_1":40953,
+    "OBJECTID":20742,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201805000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{DFDA66C4-EAAB-47EA-B699-2977FD2DCD7B}",
+    "IRWINID":"{9FE2B5DA-6563-4BEB-A5F1-096C6E4808BE}",
+    "UNQE_FIRE_":"2012-CANOD-003490",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"3490",
+    "INCIDENT":"Rush",
+    "UNIT_ID":"USCANOD",
+    "POO_RESP_I":"USCANOD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":315510.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.61720466,-120.0914775 ]
+    },
+    "properties": {
+    "FID":66,
+    "FID_1":40956,
+    "OBJECTID":20745,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201805000000,
+    "COMMENTS":"Fire perimeter obtained from MTBS - S. Levitt 5/6/2016",
+    "GEO_ID":"{44067875-1C04-4167-9B2D-787B49A9040A}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-CANOD-003490",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"3490",
+    "INCIDENT":"Rush",
+    "UNIT_ID":"USCANOD",
+    "POO_RESP_I":"USCANOD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":306810.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.43955456,-117.6385303 ]
+    },
+    "properties": {
+    "FID":67,
+    "FID_1":41158,
+    "OBJECTID":20947,
+    "MAP_METHOD":"GPS-Unknown",
+    "DATE_CUR":201805000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{48876E3D-732E-4EC6-B1D2-2A7807A33265}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2012-ORVAD-000067",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"67",
+    "INCIDENT":"Long Draw",
+    "UNIT_ID":"USORVAD",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":449015.3,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.61509916,-114.0367521 ]
+    },
+    "properties": {
+    "FID":68,
+    "FID_1":41696,
+    "OBJECTID":21505,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{CCB3496A-F2F3-44ED-BA8A-121EC9E36DBD}",
+    "IRWINID":"01B2040E-AED8-4FE2-B2E3-2D582EBB4EA9",
+    "UNQE_FIRE_":"2018--010229",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"10229",
+    "INCIDENT":"Goose Creek",
+    "UNIT_ID":"NVEKD",
+    "POO_RESP_I":"NVEKD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":132230,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.94892985,-111.5312973 ]
+    },
+    "properties": {
+    "FID":69,
+    "FID_1":41844,
+    "OBJECTID":21653,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{D4C38C9F-A55A-4C81-9B9C-6368AABE864D}",
+    "IRWINID":"E2C9AC9D-6591-4065-865C-0B6E760A6DAF",
+    "UNQE_FIRE_":"2018--000971",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"971",
+    "INCIDENT":"Pole Creek",
+    "UNIT_ID":"UTUWF",
+    "POO_RESP_I":"UTUWF",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":101423,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 47.08788492,-107.7607772 ]
+    },
+    "properties": {
+    "FID":70,
+    "FID_1":41932,
+    "OBJECTID":21741,
+    "MAP_METHOD":"GPS-Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":"Merged Fires include Bridge Coulee, Barker, South Breaks, and Square Butte",
+    "GEO_ID":"{2139631A-DAD7-416E-A73F-75AC922F1EDF}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-MTMCD-000000",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"0",
+    "INCIDENT":"Lodgepole Complex",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":270723.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.60211554,-116.9757999 ]
+    },
+    "properties": {
+    "FID":71,
+    "FID_1":42141,
+    "OBJECTID":21950,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{78A85339-C0BF-4D24-8B91-2F84DA26AB4B}",
+    "IRWINID":"2980ef8d-e188-4a96-aae6-b133d4706bb9",
+    "UNQE_FIRE_":"2018-NVHUMX-020170",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"20170",
+    "INCIDENT":"Martin",
+    "UNIT_ID":"USNVHUMX",
+    "POO_RESP_I":"USNVHUMX",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":431753.7,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.72516691,-116.0003377 ]
+    },
+    "properties": {
+    "FID":72,
+    "FID_1":42177,
+    "OBJECTID":21986,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{8AEDAB20-4EE3-42C3-8E2D-C196E97447E8}",
+    "IRWINID":"a86e6f46-c43e-49aa-90e2-64c52f31739b",
+    "UNQE_FIRE_":"2018-NVECFX-010299",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"10299",
+    "INCIDENT":"South Sugarloaf",
+    "UNIT_ID":"USNVECFX",
+    "POO_RESP_I":"USNVECFX",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":233461.6,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.61509321,-114.0367398 ]
+    },
+    "properties": {
+    "FID":73,
+    "FID_1":42182,
+    "OBJECTID":21991,
+    "MAP_METHOD":"GPS-Flight",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":"{32864729-9B69-4107-A6AB-AF53917336F9}",
+    "IRWINID":"01b2040e-aed8-4fe2-b2e3-2d582ebb4ea9",
+    "UNQE_FIRE_":"2018-NVEKD-010229",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"10229",
+    "INCIDENT":"Goose Creek",
+    "UNIT_ID":"USNVEKD",
+    "POO_RESP_I":"USNVEKD",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":132220,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.4186476,-123.8423741 ]
+    },
+    "properties": {
+    "FID":74,
+    "FID_1":42192,
+    "OBJECTID":22001,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":999909000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{8AF14C14-C09E-4AF8-937B-AB1582623680}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-ORRSF-000354",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"354",
+    "INCIDENT":"Klondike",
+    "UNIT_ID":"USORRSF",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":173614.9,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 36.32611277,-121.7216632 ]
+    },
+    "properties": {
+    "FID":75,
+    "FID_1":42295,
+    "OBJECTID":22104,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201901000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{3CF42ACD-7837-43CA-B1A2-8E5ADF85EB20}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2016-CACND-003422",
+    "FIRE_YEAR":2016,
+    "LOCAL_NUM":"3422",
+    "INCIDENT":"Soberanes",
+    "UNIT_ID":"USCAPRI",
+    "POO_RESP_I":"USCABEU",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":132122,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.90421565,-119.9398639 ]
+    },
+    "properties": {
+    "FID":76,
+    "FID_1":42762,
+    "OBJECTID":22571,
+    "MAP_METHOD":"GPS-Unknown",
+    "DATE_CUR":201901000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{3FCD86AE-1392-4EBF-A932-8D6FC38CD62F}",
+    "IRWINID":"{2C0B6092-73C0-4925-8180-1AB93BE95116}",
+    "UNQE_FIRE_":"2013-CACND-002857",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"2857",
+    "INCIDENT":"Rim",
+    "UNIT_ID":"USCASTF",
+    "POO_RESP_I":"USCASTF",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":256916.2,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.28727186,-122.7680567 ]
+    },
+    "properties": {
+    "FID":77,
+    "FID_1":42912,
+    "OBJECTID":22721,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201902000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{B4C47B41-648D-4E25-B648-5F36E6666D44}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-CACND-008646",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"8646",
+    "INCIDENT":"Ranch",
+    "UNIT_ID":"USCAPVT",
+    "POO_RESP_I":"USCAMEU",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":410200.9,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 34.4329459,-119.1143044 ]
+    },
+    "properties": {
+    "FID":78,
+    "FID_1":43071,
+    "OBJECTID":22880,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201902000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{19CDD7B3-E2BD-4F4D-BCA9-BE92EA713D39}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-CACND-003583",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"3583",
+    "INCIDENT":"Thomas",
+    "UNIT_ID":"USCAVNC",
+    "POO_RESP_I":"USCAVNC",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":281789.8,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.70207077,-122.587745 ]
+    },
+    "properties": {
+    "FID":79,
+    "FID_1":43166,
+    "OBJECTID":22975,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201902000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{7476EBC2-EB24-468A-BA91-8B4C5EAF2F52}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-CANOD-001084",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"1084",
+    "INCIDENT":"Carr",
+    "UNIT_ID":"USCAWNP",
+    "POO_RESP_I":"USCAWNP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":229650.5,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.75164216,-121.559146 ]
+    },
+    "properties": {
+    "FID":80,
+    "FID_1":43192,
+    "OBJECTID":23001,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201902000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{08B94D4E-ECA4-4155-AF40-2CC980DB3E2A}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-CANOD-016737",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"16737",
+    "INCIDENT":"Camp",
+    "UNIT_ID":"USCAPVT",
+    "POO_RESP_I":"USCABTU",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":153335,
+    "USER_NAME":" ",
+    "SOURCE":"BLM",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.55104965,-105.1487179 ]
+    },
+    "properties": {
+    "FID":81,
+    "FID_1":43383,
+    "OBJECTID":155,
+    "MAP_METHOD":" ",
+    "DATE_CUR":20181009,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-COCTX-001266\n",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":" ",
+    "INCIDENT":"Spring Creek",
+    "UNIT_ID":"COCTX",
+    "POO_RESP_I":"COCTX",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":108131.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.60210983,-116.9757871 ]
+    },
+    "properties": {
+    "FID":82,
+    "FID_1":43586,
+    "OBJECTID":358,
+    "MAP_METHOD":" ",
+    "DATE_CUR":20190327,
+    "COMMENTS":"Human caused",
+    "GEO_ID":"98E62964-40FA-4541-BC85-09253AE92BA9",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-NVHUMX-020170",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"20170",
+    "INCIDENT":"Martin",
+    "UNIT_ID":"NVHUMX",
+    "POO_RESP_I":"NVHUMX",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":431753.7,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 41.72516111,-116.000325 ]
+    },
+    "properties": {
+    "FID":83,
+    "FID_1":43597,
+    "OBJECTID":369,
+    "MAP_METHOD":" ",
+    "DATE_CUR":20190327,
+    "COMMENTS":" ",
+    "GEO_ID":"698356F4-6BDE-4074-B070-DEDA89A265FF",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-NVECFX-010299",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"100299",
+    "INCIDENT":"South Sugarloaf",
+    "UNIT_ID":"NVECFX",
+    "POO_RESP_I":"NVECFX",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":233461.6,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.94922002,-111.5311552 ]
+    },
+    "properties": {
+    "FID":84,
+    "FID_1":43605,
+    "OBJECTID":377,
+    "MAP_METHOD":" ",
+    "DATE_CUR":20190305,
+    "COMMENTS":" ",
+    "GEO_ID":"EF3AA089-14AE-4C0B-9078-BEA10B957CEC",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-UTUWF-000971",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"UT-UWF-971",
+    "INCIDENT":"Pole Creek",
+    "UNIT_ID":"UT-UWF",
+    "POO_RESP_I":"UT-UWF",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":101875,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.28726694,-122.7680432 ]
+    },
+    "properties": {
+    "FID":85,
+    "FID_1":43622,
+    "OBJECTID":394,
+    "MAP_METHOD":" ",
+    "DATE_CUR":0,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-CAMNF-000849",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"4",
+    "INCIDENT":"Ranch",
+    "UNIT_ID":"CAMEU",
+    "POO_RESP_I":"CAMEU",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":410202.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.41875597,-123.8429418 ]
+    },
+    "properties": {
+    "FID":86,
+    "FID_1":43691,
+    "OBJECTID":463,
+    "MAP_METHOD":" ",
+    "DATE_CUR":20190320,
+    "COMMENTS":"Lightning Fire Reported by Oak Flat landowner-Ordered Jumpers w/aviation support IC Hays",
+    "GEO_ID":"D18F575B-2818-4A78-9983-1BDFF64D570B",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2018-ORRSF-000354",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"354",
+    "INCIDENT":"Klondike",
+    "UNIT_ID":"ORRSF",
+    "POO_RESP_I":"ORRSF",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":228235.4,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.72773317,-115.3864747 ]
+    },
+    "properties": {
+    "FID":87,
+    "FID_1":70180,
+    "OBJECTID":27008,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20120803,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"628",
+    "INCIDENT":"Trinity Ridge West",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":132712.4,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 44.41726459,-114.9756719 ]
+    },
+    "properties": {
+    "FID":88,
+    "FID_1":70192,
+    "OBJECTID":27020,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20120727,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"12151",
+    "INCIDENT":"Halstead",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":179336.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.90446938,-119.9390817 ]
+    },
+    "properties": {
+    "FID":89,
+    "FID_1":70572,
+    "OBJECTID":27400,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20130817,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"6",
+    "INCIDENT":"Rim",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":256175.5,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 39.40540444,-112.2306966 ]
+    },
+    "properties": {
+    "FID":90,
+    "FID_1":70623,
+    "OBJECTID":27452,
+    "MAP_METHOD":"GPS-Unknown Travel Method",
+    "DATE_CUR":20120627,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":" ",
+    "INCIDENT":"Clay Springs",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":107822.8,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 33.79862395,-109.2994481 ]
+    },
+    "properties": {
+    "FID":91,
+    "FID_1":70691,
+    "OBJECTID":27520,
+    "MAP_METHOD":"Other",
+    "DATE_CUR":20110529,
+    "COMMENTS":"NFMID_LNK USF03012011000020,",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"2011-020",
+    "INCIDENT":"Wallow",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":538049.4,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 44.0321684,-115.4674797 ]
+    },
+    "properties": {
+    "FID":92,
+    "FID_1":70991,
+    "OBJECTID":27820,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":20161118,
+    "COMMENTS":"StatCause & Total Acres not filled out in FireStat",
+    "GEO_ID":"{F5EA02F2-451D-42A9-9054-3D40E46DBFA7}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2016,
+    "LOCAL_NUM":"539",
+    "INCIDENT":"PIONEER",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":188404.1,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 36.8897147,-82.57049568 ]
+    },
+    "properties": {
+    "FID":93,
+    "FID_1":70994,
+    "OBJECTID":27823,
+    "MAP_METHOD":"GPS-Unknown Travel Method",
+    "DATE_CUR":20160130,
+    "COMMENTS":"Muzzle Loader",
+    "GEO_ID":"{C65282D0-54BD-4C28-84A7-4EC47A301625}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2016,
+    "LOCAL_NUM":"26",
+    "INCIDENT":"West Chaparral",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":503990.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 45.45697805,-114.4877153 ]
+    },
+    "properties": {
+    "FID":94,
+    "FID_1":71003,
+    "OBJECTID":27832,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20120730,
+    "COMMENTS":"rebuild of a corrupt database (20120915 @ 2045)",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":"12190",
+    "INCIDENT":"Mustang Complex",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":341415.1,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 35.85101846,-106.4163589 ]
+    },
+    "properties": {
+    "FID":95,
+    "FID_1":71715,
+    "OBJECTID":28544,
+    "MAP_METHOD":"GPS-Unknown Travel Method",
+    "DATE_CUR":,
+    "COMMENTS":"NFMID_LNK USF03102011000099,",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":" ",
+    "INCIDENT":"Las Conchas",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":156593,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.48225097,-115.4529197 ]
+    },
+    "properties": {
+    "FID":96,
+    "FID_1":71982,
+    "OBJECTID":28811,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20130809,
+    "COMMENTS":"BAER Team Perimeter, Pony and Elk Complexes, August 22, 2013",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"1053",
+    "INCIDENT":"Elk Complex (Village, Pierce)",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":131014.5,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 36.3261079,-121.7216503 ]
+    },
+    "properties": {
+    "FID":97,
+    "FID_1":72615,
+    "OBJECTID":29445,
+    "MAP_METHOD":"Digitized-Other",
+    "DATE_CUR":20170323,
+    "COMMENTS":"Fire started on State land and burned onto Los Padres Forest. Garrapata State Park.IRWIN has only 2016-CABEU-003422 with irwinid: EB4671D6-4D4D-431A-A6A7-0B2C1A7FDF8A. matches discovery time and fire",
+    "GEO_ID":"{A3C55A87-C982-4C13-A0E0-AB4B13EEA76A}",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2016,
+    "LOCAL_NUM":"2427",
+    "INCIDENT":"Soberanes",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":132122.5,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.38246591,-115.6854336 ]
+    },
+    "properties": {
+    "FID":98,
+    "FID_1":73235,
+    "OBJECTID":30065,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20130808,
+    "COMMENTS":"BAER Team Perimeter, Pony and Elk Complexes, August 22, 2013",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"1047",
+    "INCIDENT":"Pony Cmplx (Dixie, Long Tom, Mudd)",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":153791.1,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 33.33497576,-108.5954953 ]
+    },
+    "properties": {
+    "FID":99,
+    "FID_1":73536,
+    "OBJECTID":30366,
+    "MAP_METHOD":"Infrared Image",
+    "DATE_CUR":20120520,
+    "COMMENTS":"NFMID_LNK USF03062012000200,",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":" ",
+    "INCIDENT":"Whitewater-Baldy Complex",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":297350.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 33.0113111,-107.822682 ]
+    },
+    "properties": {
+    "FID":100,
+    "FID_1":73611,
+    "OBJECTID":30441,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":20130607,
+    "COMMENTS":"KCFAST Report Incorrectly Has Size as 234,000 ac.",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"497",
+    "INCIDENT":"Silver",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":138515.1,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 31.89332265,-109.3003082 ]
+    },
+    "properties": {
+    "FID":101,
+    "FID_1":74221,
+    "OBJECTID":31053,
+    "MAP_METHOD":"Other",
+    "DATE_CUR":20110508,
+    "COMMENTS":"NFMID_LNK USF03052011000034,",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"4-Jan",
+    "INCIDENT":"Horseshoe2",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":" ",
+    "GIS_ACRES":223019.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 48.77545636,-120.4566594 ]
+    },
+    "properties": {
+    "FID":102,
+    "FID_1":74757,
+    "OBJECTID":31589,
+    "MAP_METHOD":" ",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-WAOWF-000267",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"2",
+    "INCIDENT":"Diamond Creek",
+    "UNIT_ID":"WAOWF",
+    "POO_RESP_I":"WAOWF",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":126836.3,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.24203806,-124.0549356 ]
+    },
+    "properties": {
+    "FID":103,
+    "FID_1":74876,
+    "OBJECTID":31708,
+    "MAP_METHOD":" ",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-ORRSF-000326",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"326",
+    "INCIDENT":"Chetco Bar",
+    "UNIT_ID":"ORRSF",
+    "POO_RESP_I":"ORRSF",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":191204.6,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 47.24659985,-113.265963 ]
+    },
+    "properties": {
+    "FID":104,
+    "FID_1":74976,
+    "OBJECTID":31808,
+    "MAP_METHOD":" ",
+    "DATE_CUR":,
+    "COMMENTS":"Inital ICT4 Kolb. Fire merged w/Reef (10,658 acres / FNF) on 9/7/17, and w/Northfork (2,000 acres LNF) on 9/10/17.",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-MTLNF-001464",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"4",
+    "INCIDENT":"Rice Ridge",
+    "UNIT_ID":"MTLNF",
+    "POO_RESP_I":"MTLNF",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":160001.8,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.82156016,-109.5985355 ]
+    },
+    "properties": {
+    "FID":105,
+    "FID_1":75038,
+    "OBJECTID":31870,
+    "MAP_METHOD":" ",
+    "DATE_CUR":,
+    "COMMENTS":" ",
+    "GEO_ID":" ",
+    "IRWINID":" ",
+    "UNQE_FIRE_":"2017-UTMLF-007075",
+    "FIRE_YEAR":2017,
+    "LOCAL_NUM":"7075",
+    "INCIDENT":"Causeway",
+    "UNIT_ID":"410",
+    "POO_RESP_I":"UTMLF",
+    "FEATURE_CA":"Final Wildfire Perimeter",
+    "GIS_ACRES":3086170,
+    "USER_NAME":" ",
+    "SOURCE":"USFS",
+    "AGENCY":" "
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 40.70207077,-122.587745 ]
+    },
+    "properties": {
+    "FID":106,
+    "FID_1":81013,
+    "OBJECTID":5733,
+    "MAP_METHOD":"Mixed Methods",
+    "DATE_CUR":201902000000,
+    "COMMENTS":"Carr 2018 last perimeter found on NIFC FTP site dated 8/31/2018, WFMI 723627",
+    "GEO_ID":"{84F01117-8B74-4910-BDD1-D96A522F3217}",
+    "IRWINID":"723627",
+    "UNQE_FIRE_":"2018-CAWNP-1084",
+    "FIRE_YEAR":2018,
+    "LOCAL_NUM":"1084",
+    "INCIDENT":"Carr",
+    "UNIT_ID":"CAWNP",
+    "POO_RESP_I":"CAWNP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":229651.4,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 35.85104529,-106.4163303 ]
+    },
+    "properties": {
+    "FID":107,
+    "FID_1":81262,
+    "OBJECTID":5171,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201710000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{BDA20651-E8F4-464B-8B04-DEF9F2911880}",
+    "IRWINID":"622400",
+    "UNQE_FIRE_":"2011-NMBAP-26",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"26",
+    "INCIDENT":"Las Conchas",
+    "UNIT_ID":"NMBAP",
+    "POO_RESP_I":"NMBAP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":156857.9,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 30.50692581,-103.9359361 ]
+    },
+    "properties": {
+    "FID":108,
+    "FID_1":81731,
+    "OBJECTID":5956,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201712000000,
+    "COMMENTS":"Rock House \\2011\\Wildfire Final Perimeter\\2011-TXTXS",
+    "GEO_ID":"{6519D8A2-84D6-4B53-8623-5AD1ACC25771}",
+    "IRWINID":"619543",
+    "UNQE_FIRE_":"2011-TXFDP-1103",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"1103",
+    "INCIDENT":"Rock House",
+    "UNIT_ID":"TXFDP",
+    "POO_RESP_I":"TXFDP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":314377.1,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 43.01199374,-113.8249005 ]
+    },
+    "properties": {
+    "FID":109,
+    "FID_1":83377,
+    "OBJECTID":7632,
+    "MAP_METHOD":"Autonomous GPS",
+    "DATE_CUR":201711000000,
+    "COMMENTS":"Source: GEOMAC 2012 data. Commnets: GPS air\\Flat Top 2\\2012\\Wildfire Final Perimeter\\2012-IDTFD",
+    "GEO_ID":"{919BBBE3-AF5E-4FE9-A91E-15524321FBDF}",
+    "IRWINID":"{35B73CB5-4494-48CD-A086-F9A4AD37032B}",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":" ",
+    "INCIDENT":"Flat Top 2",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":140835.3,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 42.99592364,-113.7655227 ]
+    },
+    "properties": {
+    "FID":110,
+    "FID_1":84369,
+    "OBJECTID":9157,
+    "MAP_METHOD":"Other",
+    "DATE_CUR":201711000000,
+    "COMMENTS":"Source: WFDSS download 11/15/12, Brandon Brown,, Map Method: Drawn / Ground\\Flat Top 2\\2012\\Wildfire Final Perimeter\\2012-IDTFD-424",
+    "GEO_ID":"{C91BEF16-290D-47B6-BABB-4E65FF6AFE1E}",
+    "IRWINID":"{7A409799-32CA-46FD-AF24-83777B88484F}",
+    "UNQE_FIRE_":" ",
+    "FIRE_YEAR":2012,
+    "LOCAL_NUM":" ",
+    "INCIDENT":"Flat Top 2",
+    "UNIT_ID":" ",
+    "POO_RESP_I":" ",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":106059.4,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 36.84094817,-118.9220627 ]
+    },
+    "properties": {
+    "FID":111,
+    "FID_1":85899,
+    "OBJECTID":9937,
+    "MAP_METHOD":"Other",
+    "DATE_CUR":201703000000,
+    "COMMENTS":"started on Sierra National Forest",
+    "GEO_ID":"{8196D3A4-2CDE-4E67-A084-C2820DD5A8BE}",
+    "IRWINID":"686727",
+    "UNQE_FIRE_":"2015-CAKNP-138",
+    "FIRE_YEAR":2015,
+    "LOCAL_NUM":"138",
+    "INCIDENT":"Rough",
+    "UNIT_ID":"CAKNP",
+    "POO_RESP_I":"CAKNP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":151546.8,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 31.89332267,-109.3003081 ]
+    },
+    "properties": {
+    "FID":112,
+    "FID_1":90896,
+    "OBJECTID":15354,
+    "MAP_METHOD":"Unknown",
+    "DATE_CUR":201703000000,
+    "COMMENTS":" ",
+    "GEO_ID":"{912C6F71-7A62-4941-927C-490AFE8019B4}",
+    "IRWINID":"620348",
+    "UNQE_FIRE_":"2011-AZCHP-1247",
+    "FIRE_YEAR":2011,
+    "LOCAL_NUM":"1247",
+    "INCIDENT":"Horseshoe 2",
+    "UNIT_ID":"AZCHP",
+    "POO_RESP_I":"AZCHP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":222989.9,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
+       "coordinates":  [ 37.90447455,-119.9390945 ]
+    },
+    "properties": {
+    "FID":113,
+    "FID_1":92603,
+    "OBJECTID":16609,
+    "MAP_METHOD":"Autonomous GPS",
+    "DATE_CUR":201703000000,
+    "COMMENTS":"Suppressed Human Caused",
+    "GEO_ID":"{FF3D5AD3-70C3-4564-AE64-E084B869E350}",
+    "IRWINID":"665101",
+    "UNQE_FIRE_":"2013-CAYNP-126",
+    "FIRE_YEAR":2013,
+    "LOCAL_NUM":"126",
+    "INCIDENT":"RIM",
+    "UNIT_ID":"CAYNP",
+    "POO_RESP_I":"CAYNP",
+    "FEATURE_CA":"Wildfire",
+    "GIS_ACRES":256175.6,
+    "USER_NAME":" ",
+    "SOURCE":"NPS",
+    "AGENCY":"NPS"
+    }
+  }
+]
+}
 
-  
 
-            // When a click event occurs on a feature in the csvData layer, open a popup at the
-            // location of the feature, with description HTML from its properties.
-            map.on('click', 'csvData', function (e) {
-              var coordinates = e.features[0].geometry.coordinates.slice();
-
-              //set popup text 
-              //You can adjust the values of the popup to match the headers of your CSV. 
-              // For example: e.features[0].properties.Name is retrieving information from the field Name in the original CSV. 
-              var description = `<h3>` + `<b>` + `Wildfire Incident Date: ` + `</b>` +`<h3>` + e.features[0].properties.FIRE_YEAR + `</h3>` + `<h4>` + `<b>` + `Acres: ` + `</b>` + e.features[0].properties.GIS_ACRES + `</h4>` + `<h4>` + `<b>` + `Incident: ` + `</b>` + e.features[0].properties.INCIDENT + `</h4>`;
-
-
-              new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(description)
-                .addTo(map);
-            });
-
-            // Change the cursor to a pointer when the mouse is over the places layer.
-            map.on('mouseenter', 'csvData', function () {
-              map.getCanvas().style.cursor = 'pointer';
-            });
-
-            // Change it back to a pointer when it leaves.
-            map.on('mouseleave', 'places', function () {
-              map.getCanvas().style.cursor = '';
-            });
-
-          });
-
+      map.on("load", function() {
+        map.addLayer({
+          id: "places",
+          type: "symbol",
+          source: {
+            type: "geojson",
+            data: geojson
+          },
+          layout: {
+            "icon-image": "fire-station-15",
+            "icon-size": 1.25,
+            "icon-allow-overlap": true,
+          }
         });
-      };
-    });
-    
-  </script>
 
-</body>
 
-</html>
-	
+        const pubTypes = geojson.features.map(feature => feature.properties.INCIDENT);
+        const uniquePubTypes = Array.from(new Set(pubTypes));
+        const filterElem = document.getElementById('pubTypeFilter');
+        uniquePubTypes.forEach(pubType => {
+          const opt = document.createElement('option');
+          opt.value = pubType;
+          opt.innerText = pubType; 
+          filterElem.appendChild(opt);
+        });
+	      
+
+        filterElem.onchange = () => {
+          const pubType = filterElem.value;
+          const newGeoJSON = {...geojson };
+          if (pubType) {
+            newGeoJSON.features = geojson.features.filter(feature => feature.properties.INCIDENT === pubType);
+          } else {
+            newGeoJSON.features = [...geojson.features];
+          }
+          map.getSource('places').setData(newGeoJSON);
+        };
+
+	      
+        const popup = new mapboxgl.Popup();
+        map.on("click", e => {
+          const features = map.queryRenderedFeatures(e.point, { layers: ['places'] });
+          if (features && features.length > 0) {
+            popup
+              .setLngLat(e.lngLat)
+              .setHTML(
+                "<h3>" +
+                  features[0].properties.INCIDENT +
+                  "</h3>" +
+                  "<h3>" +
+                  features[0].properties.FIRE_YEAR +
+                  "</h3>" +
+		  "<h3>" +
+                  features[0].properties.FIRE_SIZE +
+                  "</h3>"
+              )
+              .addTo(map);
+          } else {
+            popup.remove();
+          }
+        });
+
+	      });
+
+	  
+	 	  
+	  </script>
+  </body>
 </html>
