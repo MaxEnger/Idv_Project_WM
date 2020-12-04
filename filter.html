@@ -2,13 +2,14 @@
 <html>
 
 <head>
+	
   <meta charset='utf-8' />
-  <title>Studio 4</title>
+  <title>Final Individual Project</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-  <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
-  <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
 
 <style>
@@ -55,70 +56,58 @@
 		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 		}
 
-	
  </style>
   <link rel="stylesheet" href="style.css">
-
   
- </head>
- 
-<body>
-	<h1>Max Enger, Final Project
-	  <h2>Historic Mega-Wildfire Ignitions in the US from 2010-2018</h2>
+</head>
 
-	  <div class="container">
-	    <div class="center">
-	      <ul>
-		 <li><a href="index.html" target="_self">Perimeters</a></li>
-		 <li><a href="wildfire.html" target="_self">Ignitions</a></li>
-		 <li><a href="combine.html" target="_self">Output 3</a></li>
-		 <li><a class="active" href="filter.html" target="_self">Filter</a></li>
-		 <li><a href="ignition_selection.html" target="_self">Output 4</a></li>
-     		 </ul>
-	      </ul>
-	    </div>
-	  </div>
-	  <br>
- <style>
-   .filter-ctrl {
-	position: absolute;
-	top: 10px;
-	right: 10px;
-	z-index: 1;
-	}
-   .filter-ctrl input[type='text'] {
-	font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-	width: 100%;
-	border: 0;
-	background-color: #fff;
-	margin: 0;
-	color: rgba(0, 0, 0, 0.5);
-	padding: 10px;
-	box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
-	border-radius: 3px;
-	width: 180px;
-	}
-	 
-
-</style>
-	
+  <body>
+    <h1>Wildfire Ignitions (>=100,000 Acres)</h1> 
+  	  
+    <div class="container">
+    <div class="center">
+      <ul>
+  	 <li><a href="index.html" target="_self">Overview</a></li>
+         <li><a href="perimeters.html" target="_self">Perimeters</a></li>
+         <li><a class="active" href="ignitions.html" target="_self">Ignitions</a></li>
+         <li><a href="ignition_selection.html" target="_self">Output 4</a></li>
+      </ul>
+    </div>
+  </div>
+  <br>
 <div id="map"></div>
-<div class="filter-ctrl">
-<input
-id="filter-input"
-type="text"
-name="filter"
-placeholder="Filter by name"
-/>
+
+<div class="inputs" id="event-types">
+  <input type="checkbox" class="event-type" name="funfair" value="funfair" checked="true">
+  <label for="funfair">Funfair</label>
+  <input type="checkbox" class="event-type" name="trade" value="trade-demonstration" checked="true">
+  <label for="trade">Trade demonstration</label>
+  <input type="checkbox" class="event-type" name="free-exhibition" value="free-exhibition" checked="true">
+  <label for="free-exhibition">Free exhibition</label>
+  <input type="checkbox" class="event-type" name="paying-exhibition" value="paying-exhibition" checked="true">
+  <label for="exhibition">Paying exhibition</label>
+  <input type="checkbox" class="event-type" name="paying-demonstration" value="paying-demonstration" checked="true">
+  <label for="paying-demonstration">Paying demonstration</label>
+  <input type="checkbox" class="event-type" name="unknown" value="unknown" checked="true">
+  <label for="unknown">Unknown</label>
 </div>
- 
-<script>
-mapboxgl.accessToken = 'pk.eyJ1IjoibWVuZ2VyMSIsImEiOiJja2c4MTNrYXcwY3kyMnRyd2o4bmk3MXViIn0.95qsNWKiUizVcqHK1qwr4g';
-var places = {
-"type": "FeatureCollection",
-	"name": "GL_100k_fires",
-	"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4269" } },
-"features": [
+
+<div class="inputs" id="years">
+  <input type="checkbox" class="year" name="1890" value="1890" checked="true">
+  <label for="1890">1890</label>
+  <input type="checkbox" class="year" value="1892" checked="true">
+  <label for="1892">1892</label>
+  <input type="checkbox" class="year" value="1893" checked="true">
+  <label for="1893">1893</label>
+</div>
+
+  <script>
+let checkboxStates
+
+const geojson = {
+        id: "places",
+        type: "FeatureCollection",
+        "features": [
 { "type": "Feature", "properties": { "OBJECTID": 7413, "FOD_ID": 7449, "FPA_ID": "FS-1433115", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USNMCIF", "NWCG_REP_2": "Cibola National Forest", "SOURCE_REP": "0303", "SOURCE_R_1": "Cibola National Forest", "LOCAL_FIRE": "12", "LOCAL_INCI": "007", "FIRE_CODE": "CC6D", "FIRE_NAME": "I-40", "ICS_209_IN": "TX-TXS-066077", "ICS_209_NA": "East Amarillo Complex", "MTBS_ID": "TX3551510078020060312", "MTBS_FIRE_": "EAST AMARILLO COMPLEX", "COMPLEX_NA": "EAST AMARILLO COMPLEX", "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/03\/12", "DISCOVERY1": 71, "DISCOVER_1": "1100", "STAT_CAUSE": 9.0, "STAT_CAU_1": "Miscellaneous", "CONT_DATE": "2006\/03\/19", "CONT_DOY": 78, "CONT_TIME": "2000", "FIRE_SIZE": 427696.0, "FIRE_SIZE_": "G", "LATITUDE": 35.21666667, "LONGITUDE": -100.93333333, "OWNER_CODE": 14.0, "OWNER_DESC": "MISSING\/NOT SPECIFIED", "STATE": "TX", "COUNTY": "179", "FIPS_CODE": "179", "FIPS_NAME": "Gray" }, "geometry": { "type": "Point", "coordinates": [ -100.933333329999982, 35.216666670000052 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 12845, "FOD_ID": 12900, "FPA_ID": "FS-1441214", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USMTCGF", "NWCG_REP_2": "Custer Gallatin National Forest", "SOURCE_REP": "0111", "SOURCE_R_1": "Gallatin National Forest", "LOCAL_FIRE": "35", "LOCAL_INCI": "006", "FIRE_CODE": "C4YP", "FIRE_NAME": "DERBY", "ICS_209_IN": "MT-GNF-000047", "ICS_209_NA": "Derby Fire", "MTBS_ID": "MT4559210981020060822", "MTBS_FIRE_": "DERBY", "COMPLEX_NA": null, "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/08\/22", "DISCOVERY1": 234, "DISCOVER_1": "1630", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2006\/10\/19", "CONT_DOY": 292, "CONT_TIME": "1800", "FIRE_SIZE": 207115.0, "FIRE_SIZE_": "G", "LATITUDE": 45.53611111, "LONGITUDE": -109.93472222, "OWNER_CODE": 5.0, "OWNER_DESC": "USFS", "STATE": "MT", "COUNTY": "97", "FIPS_CODE": "097", "FIPS_NAME": "Sweet Grass" }, "geometry": { "type": "Point", "coordinates": [ -109.934722219999969, 45.536111110000036 ] } },
 { "type": "Feature", "properties": { "OBJECTID": 14026, "FOD_ID": 14086, "FPA_ID": "FS-1442801", "SOURCE_SYS": "FED", "SOURCE_S_1": "FS-FIRESTAT", "NWCG_REPOR": "FS", "NWCG_REP_1": "USORUMF", "NWCG_REP_2": "Umatilla National Forest", "SOURCE_REP": "0614", "SOURCE_R_1": "Umatilla National Forest", "LOCAL_FIRE": "102", "LOCAL_INCI": "416-411", "FIRE_CODE": "C6XX", "FIRE_NAME": "COLUMBIA COMPLEX", "ICS_209_IN": "OR-UMF-000411", "ICS_209_NA": "COLUMBIA COMPLEX", "MTBS_ID": "WA4616811780620060821", "MTBS_FIRE_": "COLUMBIA COMPLEX", "COMPLEX_NA": "COLUMBIA COMPLEX", "FIRE_YEAR": 2006, "DISCOVERY_": "2006\/08\/21", "DISCOVERY1": 233, "DISCOVER_1": "2240", "STAT_CAUSE": 1.0, "STAT_CAU_1": "Lightning", "CONT_DATE": "2006\/10\/09", "CONT_DOY": 282, "CONT_TIME": "1200", "FIRE_SIZE": 109259.0, "FIRE_SIZE_": "G", "LATITUDE": 46.14305556, "LONGITUDE": -118.04416667, "OWNER_CODE": 14.0, "OWNER_DESC": "MISSING\/NOT SPECIFIED", "STATE": "WA", "COUNTY": "13", "FIPS_CODE": "013", "FIPS_NAME": "Columbia" }, "geometry": { "type": "Point", "coordinates": [ -118.044166670000038, 46.14305556 ] } },
@@ -307,72 +296,58 @@ var places = {
 
 };
 
- 
-var layerIDs = []; // Will contain a list used to filter against.
-var filterInput = document.getElementById('filter-input');
-var map = new mapboxgl.Map({
-container: 'map',
-style: 'mapbox://styles/mapbox/light-v10',
-center: [-96, 37.8],
-zoom: 3
-});
- 
-map.on('load', function () {
-// Add a GeoJSON source containing place coordinates and information.
-map.addSource('places', {
-'type': 'geojson',
-'data': places
-});
- 
-places.features.forEach(function (feature) {
-var symbol = feature.properties['FIRE_NAME'];
-var layerID = "poi-" + symbol;
+const map = L.map('map').setView([-96, 37.8], 3)
 
-// Add a layer for this symbol type if it hasn't been added already.
-if (!map.getLayer(layerID)) {
-map.addLayer({
-'id': layerID,
-'type': 'symbol',
-'source': 'places',
-'layout': {
-'icon-image': symbol,
-'icon-allow-overlap': true,
-'text-field': symbol,
-'text-font': [
-'Open Sans Bold',
-'Arial Unicode MS Bold'
-],
-'text-size': 11,
-'text-transform': 'uppercase',
-'text-letter-spacing': 0.05,
-'text-offset': [0, 1.5]
-},
-'paint': {
-'text-color': '#202',
-'text-halo-color': '#fff',
-'text-halo-width': 2
-},
-'filter': ['==', "STAT_CAU_1", symbol]
-});
- 
-layerIDs.push(layerID);
+L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg', {
+  attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+  subdomains: 'abcd'
+}).addTo(map)
+
+const geojsonLayer = L.geoJSON(null,{
+	filter: (feature) => {
+  	const isYearChecked = checkboxStates.years.includes(feature.properties.FIRE_YEAR)
+    const isEventTypeChecked = checkboxStates.eventTypes.includes(feature.properties.STAT_CAU_1)
+    return isYearChecked && isEventTypeChecked //only true if both are true
+  }
+}).addTo(map)
+
+function updateCheckboxStates() {
+	checkboxStates = {
+  	years: [],
+    eventTypes: []
+  }
+  
+	for (let input of document.querySelectorAll('input')) {
+  	if(input.checked) {
+    	switch (input.className) {
+      	case 'event-type': checkboxStates.eventTypes.push(input.value); break
+        case 'year': checkboxStates.years.push(input.value); break
+      }
+    }
+  }
 }
-});
- 
-filterInput.addEventListener('keyup', function (e) {
-// If the input value matches a layerID set
-// it's visibility to 'visible' or else hide it.
-var value = e.target.value.trim().toLowerCase();
-layerIDs.forEach(function (layerID) {
-map.setLayoutProperty(
-layerID,
-'visibility',
-layerID.indexOf(value) > -1 ? 'visible' : 'none'
-);
-});
-});
-});
-</script>
- 
-</body>
+
+
+for (let input of document.querySelectorAll('input')) {
+  //Listen to 'change' event of all inputs
+  input.onchange = (e) => {
+    geojsonLayer.clearLayers()
+  	updateCheckboxStates()
+    geojsonLayer.addData(jsontest)   
+  }
+}
+
+
+/****** INIT ******/
+updateCheckboxStates()
+geojsonLayer.addData(jsontest)
+
+	  
+	  
+	    <script>
+	
+	  </body>
 </html>
+	
+	
+	
